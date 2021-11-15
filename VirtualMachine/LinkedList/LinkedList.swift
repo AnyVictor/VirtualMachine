@@ -4,7 +4,8 @@
 
 import Foundation
 
-public class LinkedList<T> {
+
+class LinkedList<T > {
     fileprivate var head: Node<T>?
     private var tail: Node<T>?
     private var globalIndex: Int = 0
@@ -29,6 +30,8 @@ public class LinkedList<T> {
         var actualNode = head
         self.head = actualNode?.next as? Node<T> ?? nil
     }
+    
+   
     
     public func append(_ el: T) {
         self.globalIndex += 1
