@@ -10,6 +10,7 @@
 		674577EB2ECA3FE5DF48AC77 /* MachineCodeInterpreter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67457BD742D5A7ACDED1DD53 /* MachineCodeInterpreter.swift */; };
 		67457A76A50C603DACE67448 /* LinkedList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 674578144F2E39749F55C7DC /* LinkedList.swift */; };
 		67457E37B037C2038CEBCFE2 /* Node.swift in Sources */ = {isa = PBXBuildFile; fileRef = 674574F8BC649FD0EF14E126 /* Node.swift */; };
+		97C9C3DB2742EEFF000966C2 /* Stack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97C9C3D92742EEFF000966C2 /* Stack.swift */; };
 		F941D0C9273DDA1300DE588D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F941D0C8273DDA1300DE588D /* AppDelegate.swift */; };
 		F941D0CB273DDA1300DE588D /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F941D0CA273DDA1300DE588D /* ViewController.swift */; };
 		F941D0CD273DDA1500DE588D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F941D0CC273DDA1500DE588D /* Assets.xcassets */; };
@@ -20,6 +21,7 @@
 		674574F8BC649FD0EF14E126 /* Node.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Node.swift; sourceTree = "<group>"; };
 		674578144F2E39749F55C7DC /* LinkedList.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LinkedList.swift; sourceTree = "<group>"; };
 		67457BD742D5A7ACDED1DD53 /* MachineCodeInterpreter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MachineCodeInterpreter.swift; sourceTree = "<group>"; };
+		97C9C3D92742EEFF000966C2 /* Stack.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Stack.swift; path = Stack/Stack.swift; sourceTree = SOURCE_ROOT; };
 		F941D0C5273DDA1300DE588D /* VirtualMachine.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VirtualMachine.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F941D0C8273DDA1300DE588D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		F941D0CA273DDA1300DE588D /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -75,6 +77,7 @@
 		F941D0C7273DDA1300DE588D /* VirtualMachine */ = {
 			isa = PBXGroup;
 			children = (
+				97C9C3D92742EEFF000966C2 /* Stack.swift */,
 				1990AAC22742B29A005DD8EF /* LinkedList */,
 				F941D0C8273DDA1300DE588D /* AppDelegate.swift */,
 				F941D0CA273DDA1300DE588D /* ViewController.swift */,
@@ -158,6 +161,7 @@
 			files = (
 				F941D0CB273DDA1300DE588D /* ViewController.swift in Sources */,
 				F941D0C9273DDA1300DE588D /* AppDelegate.swift in Sources */,
+				97C9C3DB2742EEFF000966C2 /* Stack.swift in Sources */,
 				674577EB2ECA3FE5DF48AC77 /* MachineCodeInterpreter.swift in Sources */,
 				67457A76A50C603DACE67448 /* LinkedList.swift in Sources */,
 				67457E37B037C2038CEBCFE2 /* Node.swift in Sources */,
@@ -300,11 +304,11 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = VirtualMachine/VirtualMachine.entitlements;
-				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 6S9PRZR6S2;
+				DEVELOPMENT_TEAM = T6BCWXVDAF;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
@@ -315,6 +319,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
+				OTHER_CODE_SIGN_FLAGS = "--deep";
 				PRODUCT_BUNDLE_IDENTIFIER = com.bpmapp.VirtualMachine;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -328,11 +333,11 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = VirtualMachine/VirtualMachine.entitlements;
-				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 6S9PRZR6S2;
+				DEVELOPMENT_TEAM = T6BCWXVDAF;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
@@ -343,6 +348,8 @@
 					"@executable_path/../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
+				OTHER_CODE_SIGN_FLAGS = "--deep";
+				"OTHER_CODE_SIGN_FLAGS[sdk=*]" = "--deep";
 				PRODUCT_BUNDLE_IDENTIFIER = com.bpmapp.VirtualMachine;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
