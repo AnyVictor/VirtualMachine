@@ -7,22 +7,30 @@ import Foundation
 struct code {
     var linha: Int
     var inst: String
-    var atrib1: Int
-    var atrib2: Int
-    var com: String
+    var atrib1: String?
+    var atrib2: String?
+    var com: String?
+    
+    init(linha: Int, inst: String, atrib1: String? = nil, atrib2: String? = nil, com: String? = nil) {
+        self.linha = linha
+        self.inst = inst
+        self.atrib1 = atrib1
+        self.atrib2 = atrib2
+        self.com = com
+    }
+    
 }
 
-// 1
 public class Node<T> {
-    // 2
+    
     var value: T
     var next: Node<T>?
     weak var previous: Node<T>?
     var index : Int = 0
-    // 3
+    
     init(el: T, n: Int) {
-        self.value = el
-        self.index = n
+        value = el
+        index = n
     }
 }
 
