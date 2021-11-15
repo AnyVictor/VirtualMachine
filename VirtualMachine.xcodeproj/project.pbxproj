@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		674577EB2ECA3FE5DF48AC77 /* MachineCodeInterpreter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67457BD742D5A7ACDED1DD53 /* MachineCodeInterpreter.swift */; };
+		67457A76A50C603DACE67448 /* LinkedList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 674578144F2E39749F55C7DC /* LinkedList.swift */; };
+		67457E37B037C2038CEBCFE2 /* Node.swift in Sources */ = {isa = PBXBuildFile; fileRef = 674574F8BC649FD0EF14E126 /* Node.swift */; };
 		F941D0C9273DDA1300DE588D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F941D0C8273DDA1300DE588D /* AppDelegate.swift */; };
 		F941D0CB273DDA1300DE588D /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F941D0CA273DDA1300DE588D /* ViewController.swift */; };
 		F941D0CD273DDA1500DE588D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F941D0CC273DDA1500DE588D /* Assets.xcassets */; };
@@ -14,6 +17,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		674574F8BC649FD0EF14E126 /* Node.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Node.swift; sourceTree = "<group>"; };
+		674578144F2E39749F55C7DC /* LinkedList.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LinkedList.swift; sourceTree = "<group>"; };
+		67457BD742D5A7ACDED1DD53 /* MachineCodeInterpreter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MachineCodeInterpreter.swift; sourceTree = "<group>"; };
 		F941D0C5273DDA1300DE588D /* VirtualMachine.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VirtualMachine.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F941D0C8273DDA1300DE588D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		F941D0CA273DDA1300DE588D /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -57,6 +63,9 @@
 				F941D0CC273DDA1500DE588D /* Assets.xcassets */,
 				F941D0CE273DDA1500DE588D /* Main.storyboard */,
 				F941D0D1273DDA1500DE588D /* VirtualMachine.entitlements */,
+				67457BD742D5A7ACDED1DD53 /* MachineCodeInterpreter.swift */,
+				674578144F2E39749F55C7DC /* LinkedList.swift */,
+				674574F8BC649FD0EF14E126 /* Node.swift */,
 			);
 			path = VirtualMachine;
 			sourceTree = "<group>";
@@ -133,6 +142,9 @@
 			files = (
 				F941D0CB273DDA1300DE588D /* ViewController.swift in Sources */,
 				F941D0C9273DDA1300DE588D /* AppDelegate.swift in Sources */,
+				674577EB2ECA3FE5DF48AC77 /* MachineCodeInterpreter.swift in Sources */,
+				67457A76A50C603DACE67448 /* LinkedList.swift in Sources */,
+				67457E37B037C2038CEBCFE2 /* Node.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -189,7 +201,7 @@
 				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_NO_COMMON_BLOCKS = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
@@ -249,7 +261,7 @@
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
-				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_NO_COMMON_BLOCKS = NO;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
@@ -259,6 +271,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 11.5;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
@@ -271,10 +284,11 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = VirtualMachine/VirtualMachine.entitlements;
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 2SXL86F7K6;
+				DEVELOPMENT_TEAM = T6BCWXVDAF;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
@@ -298,10 +312,11 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = VirtualMachine/VirtualMachine.entitlements;
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 2SXL86F7K6;
+				DEVELOPMENT_TEAM = T6BCWXVDAF;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
