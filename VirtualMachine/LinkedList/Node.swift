@@ -4,13 +4,6 @@
 
 import Foundation
 
-struct code {
-    var linha: Int
-    var inst: String
-    var atrib1: Int
-    var atrib2: Int
-    var com: String
-}
 
 // 1
 public class Node<T> {

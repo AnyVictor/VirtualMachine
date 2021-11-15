@@ -39,6 +39,23 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		1990AAC22742B29A005DD8EF /* LinkedList */ = {
+			isa = PBXGroup;
+			children = (
+				674574F8BC649FD0EF14E126 /* Node.swift */,
+				674578144F2E39749F55C7DC /* LinkedList.swift */,
+			);
+			path = LinkedList;
+			sourceTree = "<group>";
+		};
+		1990AAC32742B2B0005DD8EF /* MachineCodeInterpreter */ = {
+			isa = PBXGroup;
+			children = (
+				67457BD742D5A7ACDED1DD53 /* MachineCodeInterpreter.swift */,
+			);
+			path = MachineCodeInterpreter;
+			sourceTree = "<group>";
+		};
 		F941D0BC273DDA1300DE588D = {
 			isa = PBXGroup;
 			children = (
@@ -58,14 +75,13 @@
 		F941D0C7273DDA1300DE588D /* VirtualMachine */ = {
 			isa = PBXGroup;
 			children = (
+				1990AAC22742B29A005DD8EF /* LinkedList */,
 				F941D0C8273DDA1300DE588D /* AppDelegate.swift */,
 				F941D0CA273DDA1300DE588D /* ViewController.swift */,
 				F941D0CC273DDA1500DE588D /* Assets.xcassets */,
 				F941D0CE273DDA1500DE588D /* Main.storyboard */,
 				F941D0D1273DDA1500DE588D /* VirtualMachine.entitlements */,
-				67457BD742D5A7ACDED1DD53 /* MachineCodeInterpreter.swift */,
-				674578144F2E39749F55C7DC /* LinkedList.swift */,
-				674574F8BC649FD0EF14E126 /* Node.swift */,
+				1990AAC32742B2B0005DD8EF /* MachineCodeInterpreter */,
 			);
 			path = VirtualMachine;
 			sourceTree = "<group>";
@@ -288,7 +304,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = T6BCWXVDAF;
+				DEVELOPMENT_TEAM = 6S9PRZR6S2;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
@@ -316,7 +332,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = T6BCWXVDAF;
+				DEVELOPMENT_TEAM = 6S9PRZR6S2;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";

@@ -21,14 +21,20 @@ class ViewController: NSViewController {
         // Set the radio group's initial selection
         normalRadioButton.state = NSControl.StateValue.on
     
-        let filepath = Bundle.main.path(forResource: "gera1", ofType: "txt") ?? ""
-    
+        //let filepath = Bundle.main.path(forResource: "gera1", ofType: "txt") ?? ""
+        let filepath = FileManager.default.urls(for: .desktopDirectory, in: .userDomainMask)[0].appendingPathComponent("output.txt")
+        
             do {
-                let contents = try String(contentsOfFile: filepath)
-                print(contents)
+                
+                let contents = try String(contentsOf: filepath)
+                let VirtualMachine : MachineCodeInterpreter = MachineCodeInterpreter(fileContent: contents)
+                
+                VirtualMachine.analyser()
+                
+                //print(contents)
                 //  Now push second ViewController form here with contents.
             } catch {
-            
+                print("erro", error)
                 // contents could not be loaded
             }
         }
