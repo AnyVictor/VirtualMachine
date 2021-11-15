@@ -19,11 +19,14 @@ struct codeLine {
 class MachineCodeInterpreter {
     
     var fileContent: String
-    var linkedCodeLines: LinkedList<codeLine> = LinkedList<codeLine>()
+    var linkedCodeLines: LinkedList<codeLine>
     var lineCounter : Int
+    
     
     init(fileContent: String) {
         self.fileContent = fileContent
+        self.linkedCodeLines = LinkedList<codeLine>()
+        self.lineCounter = 0
     }
     
  
@@ -44,38 +47,57 @@ class MachineCodeInterpreter {
         for item in array {
             
             var i = 0
-            let arrChar = Array(item)
+            let arrChar = Array<Character>(item)
             // remove espaços iniciais
-            while(arrChar[i] == " "){
-                i+=1
+            if(arrChar.count != 0){
+                while(arrChar[i] == " "){
+                    i+=1
+                }
+                self.matchWithCommand(Array<Character>(arrChar[i..<arrChar.count]))
+                
+                self.lineCounter+=1
             }
             
-            
-            
-            
-            self.lineCounter+=1
+           
         }
+        print(linkedCodeLines)
         
     }
     
     func matchWithCommand(_ value: Array<Character>){
         
-        //var i = 0
+        var crtlCommand = 0
+        var ctrlAtrib1 = 0
+        var ctrlAtrib2 = 0
         
-        if(value[0].isNumber){ // indica marcado de NULL
+        var auxCommand = ""
+        var auxAtrib1 = ""
+        var auxAtrib2 = ""
+        for item in value{
             
-            linkedCodeLines.append(codeLine(linha: self.lineCounter, inst: "NULL", atrib1: "", atrib2: "", com: ""))
-            
-            
-        }else{
-            if(value[0] == "S"){
-                if(value[1] == "T"){
-                    
+            if(item != " "){
+                if(crtlCommand == 0){
+                    auxCommand.append(item)
+                }else if(ctrlAtrib1 == 0){
+                    auxAtrib1.append(item)
+                }else if(ctrlAtrib2 == 0){
+                    auxAtrib2.append(item)
+                }
+            }else{
+                if(crtlCommand == 0){
+                    crtlCommand = 1
+                }else if( ctrlAtrib1 == 0){
+                    ctrlAtrib1 = 1
+                }else if(ctrlAtrib2 == 0){
+                    ctrlAtrib2 = 1
                 }
             }
+            
         }
+        linkedCodeLines.append(codeLine(linha: self.lineCounter, inst: auxCommand, atrib1: auxAtrib1, atrib2: auxAtrib2, com: ""))
         
         
+     //print(linkedCodeLines)
     }
     
     
