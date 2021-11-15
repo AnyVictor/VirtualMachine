@@ -19,6 +19,38 @@ struct code {
         self.com = com
     }
     
+    func getLine() -> Int {
+        return linha
+    }
+    
+    func getInst() -> String {
+        return inst
+    }
+    
+    func getAtrib1() -> String {
+        return atrib1 ?? ""
+    }
+    
+    func getAtrib2() -> String {
+        return atrib2 ?? ""
+    }
+    
+    mutating func setLine(linha: Int) {
+        self.linha = linha
+    }
+    
+    mutating func setInst(inst: String) {
+        self.inst = inst
+    }
+    
+    mutating func setAtrib1(atrib1: String){
+        self.atrib1 = atrib1
+    }
+    
+    mutating func setAtrib2(atrib2: String){
+        self.atrib2 = atrib2
+    }
+    
 }
 
 public class Node<T> {
@@ -32,5 +64,6 @@ public class Node<T> {
         value = el
         index = n
     }
+    
 }
 
