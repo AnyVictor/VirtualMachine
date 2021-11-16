@@ -13,60 +13,13 @@ struct codeLine  {
     var atrib1: String
     var atrib2: String
     var com: String
-    
-    func getLine() -> Int {
-        return linha
-    }
-    
-    func getInst() -> String {
-        return inst
-    }
-    
-    func getAtrib1() -> String {
-        return atrib1
-    }
-    
-    func getAtrib2() -> String {
-        return atrib2
-    }
-    
-    mutating func setLine(linha: Int) {
-        self.linha = linha
-    }
-    
-    mutating func setInst(inst: String) {
-        self.inst = inst
-    }
-    
-    mutating func setAtrib1(atrib1: String){
-        self.atrib1 = atrib1
-    }
-    
-    mutating func setAtrib2(atrib2: String){
-        self.atrib2 = atrib2
-    }
 }
 
 struct stackValues {
-    
+    static var defaultValue:  stackValues = stackValues(endereco: -1, valor: -1)
     var endereco: Int
     var valor: Int
-    
-    mutating func setEndereco(endereco: Int){
-        self.endereco = endereco
-    }
-    
-    mutating func setValor(valor: Int){
-        self.valor = valor
-    }
-    
-    func getEndereco() -> Int {
-        return endereco
-    }
-    
-    func getValor() -> Int {
-        return valor
-    }
+  
     
 }
 
@@ -178,37 +131,70 @@ class MachineCodeInterpreter {
         //print(linkedCodeLines)
     }
     
+    func fixNullRotule(){
+        var _linkedCodeLines: LinkedList<codeLine> = LinkedList<codeLine>()
+
+        var value  = linkedCodeLines.first?.value ?? codeLine.defaultValue
+        
+        while(value.linha != -1){
+            if(value.inst == "CALL"){
+                for item in self.rotuleToReplace{
+                    if(item[0] == Int(value.atrib1 )){
+                        _linkedCodeLines.append(codeLine(linha: value.linha, inst: value.inst, atrib1: "\(item[1])", atrib2: "", com: ""))
+                    }
+                    
+                }
+            }else{
+                _linkedCodeLines.append(value)
+            }
+            
+            linkedCodeLines.nextNode()
+            value = linkedCodeLines.first?.value ?? codeLine.defaultValue
+            
+        }
+        
+        
+        linkedCodeLines.setHead(el: _linkedCodeLines.first!)
+        //print(_linkedCodeLines)
+        
+    }
+    
     func executaNormal(command: LinkedList<codeLine>) {
-        let linhas = command.last?.value.linha
+        let linhas = command.last?.value.linha ?? -1
         var count = 0
         var atrib = 0
-        for commands in 0..<(linhas!) {
+        for commands in 0..<(linhas+1) {
             
             if(command.nodeAt(index: commands)?.value.inst == "LDC") {
                 count += 1
-                _stackCodeLines.push(stackValues(endereco: count, valor: Int(command.nodeAt(index: commands)?.value.getAtrib1() ?? " ")!))
+                let value = command.nodeAt(index: commands)?.value ?? codeLine.defaultValue
+               
+                _stackCodeLines.push(stackValues(endereco: count, valor: Int(value.atrib1) ?? -1))
             }
             else
             if(command.nodeAt(index: commands)?.value.inst == "LDV") {
                 count += 1
-                _stackCodeLines.push(stackValues(endereco: count, valor: Int(command.nodeAt(index: commands)?.value.getAtrib1() ?? " ")!))
+                let value = command.nodeAt(index: commands)?.value ?? codeLine.defaultValue
+                let valueInStack = _stackCodeLines.itemAtPosition(Int(value.atrib1) ?? 0)
+                
+                _stackCodeLines.push(stackValues(endereco: count, valor: valueInStack.valor))
             }
             else
             if(command.nodeAt(index: commands)?.value.inst == "ADD") {
                 count -= 1
-                let soma = (_stackCodeLines.pop()?.valor ?? 0)! + (_stackCodeLines.pop()?.valor ?? 0)!
+                let soma = (_stackCodeLines.pop()?.valor ?? 0) + (_stackCodeLines.pop()?.valor ?? 0)
                 print("SOMA: ", soma)
             }
             else
             if(command.nodeAt(index: commands)?.value.inst == "SUB") {
                 count -= 1
-                let sub = (_stackCodeLines.pop()?.valor ?? 0)! - (_stackCodeLines.pop()?.valor ?? 0)!
+                let sub = (_stackCodeLines.pop()?.valor ?? 0) - (_stackCodeLines.pop()?.valor ?? 0)
                 print("SUB: ", sub)
             }
             else
             if(command.nodeAt(index: commands)?.value.inst == "MULT") {
                 count -= 1
-                let mult = (_stackCodeLines.pop()?.valor ?? 0)! * (_stackCodeLines.pop()?.valor ?? 0)!
+                let mult = (_stackCodeLines.pop()?.valor ?? 0) * (_stackCodeLines.pop()?.valor ?? 0)
                 print("MULT: ", mult)
             }
 //            else
@@ -219,19 +205,19 @@ class MachineCodeInterpreter {
 //            }
             else
             if(command.nodeAt(index: commands)?.value.inst == "INV") {
-                let inv = -(_stackCodeLines.pop()?.valor ?? 0)!
+                let inv = -(_stackCodeLines.pop()?.valor ?? 0)
                 print("INV: ", inv)
             }
             else
             if(command.nodeAt(index: commands)?.value.inst == "AND") {
                 count -= 1
-                let stackVar1 = _stackCodeLines.pop()
-                let stackVar2 = _stackCodeLines.pop()
+                let stackVar1 = _stackCodeLines.pop() ?? stackValues.defaultValue
+                let stackVar2 = _stackCodeLines.pop() ?? stackValues.defaultValue
 
-                _stackCodeLines.push(stackValues(endereco: (stackVar1?.valor)!, valor: (stackVar1?.endereco)!))
-                _stackCodeLines.push(stackValues(endereco: (stackVar2?.valor)!, valor: (stackVar2?.endereco)!))
+                _stackCodeLines.push(stackValues(endereco: Int(stackVar1.valor), valor: Int(stackVar1.endereco)))
+                _stackCodeLines.push(stackValues(endereco: Int(stackVar2.valor), valor: Int(stackVar2.endereco)))
                 
-                if(stackVar1?.valor == 1 && stackVar2?.valor == 1) {
+                if(stackVar1.valor == 1 && stackVar2.valor == 1) {
                     _stackCodeLines.push(stackValues(endereco: count, valor: 1))
                 }
                 else {
@@ -242,13 +228,13 @@ class MachineCodeInterpreter {
             else
             if(command.nodeAt(index: commands)?.value.inst == "OR") {
                 count -= 1
-                let stackVar1 = _stackCodeLines.pop()
-                let stackVar2 = _stackCodeLines.pop()
+                let stackVar1 = _stackCodeLines.pop() ?? stackValues.defaultValue
+                let stackVar2 = _stackCodeLines.pop() ?? stackValues.defaultValue
 
-                _stackCodeLines.push(stackValues(endereco: (stackVar1?.valor)!, valor: (stackVar1?.endereco)!))
-                _stackCodeLines.push(stackValues(endereco: (stackVar2?.valor)!, valor: (stackVar2?.endereco)!))
+                _stackCodeLines.push(stackValues(endereco: Int(stackVar1.valor), valor: Int(stackVar1.endereco) ))
+                _stackCodeLines.push(stackValues(endereco: Int(stackVar2.valor), valor: Int(stackVar2.endereco) ))
                 
-                if(stackVar1?.valor == 1 || stackVar2?.valor == 1) {
+                if(stackVar1.valor == 1 || stackVar2.valor == 1) {
                     _stackCodeLines.push(stackValues(endereco: count, valor: 1))
                 }
                 else {
@@ -258,7 +244,7 @@ class MachineCodeInterpreter {
             }
             else
             if(command.nodeAt(index: commands)?.value.inst == "NEG") {
-                let neg = (1 - (_stackCodeLines.pop()?.valor)!);
+                let neg = (1 - Int(_stackCodeLines.pop()?.valor));
                 _stackCodeLines.push(stackValues(endereco: count, valor: neg))
             }
             else
@@ -268,8 +254,8 @@ class MachineCodeInterpreter {
                 let stackVar1 = _stackCodeLines.pop()
                 let stackVar2 = _stackCodeLines.pop()
 
-                _stackCodeLines.push(stackValues(endereco: (stackVar1?.valor)!, valor: (stackVar1?.endereco)!))
-                _stackCodeLines.push(stackValues(endereco: (stackVar2?.valor)!, valor: (stackVar2?.endereco)!))
+                _stackCodeLines.push(stackValues(endereco: (stackVar1?.valor), valor: (stackVar1?.endereco)))
+                _stackCodeLines.push(stackValues(endereco: (stackVar2?.valor), valor: (stackVar2?.endereco)))
                 
                 if(stackVar1?.valor ?? 0 > stackVar2?.valor ?? 0) {
                     _stackCodeLines.push(stackValues(endereco: count, valor: 1))
@@ -287,8 +273,8 @@ class MachineCodeInterpreter {
                 let stackVar1 = _stackCodeLines.pop()
                 let stackVar2 = _stackCodeLines.pop()
 
-                _stackCodeLines.push(stackValues(endereco: (stackVar1?.valor)!, valor: (stackVar1?.endereco)!))
-                _stackCodeLines.push(stackValues(endereco: (stackVar2?.valor)!, valor: (stackVar2?.endereco)!))
+                _stackCodeLines.push(stackValues(endereco: (stackVar1?.valor), valor: (stackVar1?.endereco)))
+                _stackCodeLines.push(stackValues(endereco: (stackVar2?.valor), valor: (stackVar2?.endereco)))
                 
                 if(stackVar1?.valor ?? 0 < stackVar2?.valor ?? 0) {
                     _stackCodeLines.push(stackValues(endereco: count, valor: 1))
@@ -306,8 +292,8 @@ class MachineCodeInterpreter {
                 let stackVar1 = _stackCodeLines.pop()
                 let stackVar2 = _stackCodeLines.pop()
 
-                _stackCodeLines.push(stackValues(endereco: (stackVar1?.valor)!, valor: (stackVar1?.endereco)!))
-                _stackCodeLines.push(stackValues(endereco: (stackVar2?.valor)!, valor: (stackVar2?.endereco)!))
+                _stackCodeLines.push(stackValues(endereco: (stackVar1?.valor), valor: (stackVar1?.endereco)))
+                _stackCodeLines.push(stackValues(endereco: (stackVar2?.valor), valor: (stackVar2?.endereco)))
                 
                 if(stackVar1?.valor ?? 0 == stackVar2?.valor ?? 0) {
                     _stackCodeLines.push(stackValues(endereco: count, valor: 1))
@@ -325,8 +311,8 @@ class MachineCodeInterpreter {
                 let stackVar1 = _stackCodeLines.pop()
                 let stackVar2 = _stackCodeLines.pop()
 
-                _stackCodeLines.push(stackValues(endereco: (stackVar1?.valor)!, valor: (stackVar1?.endereco)!))
-                _stackCodeLines.push(stackValues(endereco: (stackVar2?.valor)!, valor: (stackVar2?.endereco)!))
+                _stackCodeLines.push(stackValues(endereco: (stackVar1?.valor), valor: (stackVar1?.endereco)))
+                _stackCodeLines.push(stackValues(endereco: (stackVar2?.valor), valor: (stackVar2?.endereco)))
                 
                 if(stackVar1?.valor ?? 0 != stackVar2?.valor ?? 0) {
                     _stackCodeLines.push(stackValues(endereco: count, valor: 1))
@@ -344,8 +330,8 @@ class MachineCodeInterpreter {
                 let stackVar1 = _stackCodeLines.pop()
                 let stackVar2 = _stackCodeLines.pop()
 
-                _stackCodeLines.push(stackValues(endereco: (stackVar1?.valor)!, valor: (stackVar1?.endereco)!))
-                _stackCodeLines.push(stackValues(endereco: (stackVar2?.valor)!, valor: (stackVar2?.endereco)!))
+                _stackCodeLines.push(stackValues(endereco: (stackVar1?.valor), valor: (stackVar1?.endereco)))
+                _stackCodeLines.push(stackValues(endereco: (stackVar2?.valor), valor: (stackVar2?.endereco)))
                 
                 if(stackVar1?.valor ?? 0 >= stackVar2?.valor ?? 0) {
                     _stackCodeLines.push(stackValues(endereco: count, valor: 1))
@@ -363,8 +349,8 @@ class MachineCodeInterpreter {
                 let stackVar1 = _stackCodeLines.pop()
                 let stackVar2 = _stackCodeLines.pop()
 
-                _stackCodeLines.push(stackValues(endereco: (stackVar1?.valor)!, valor: (stackVar1?.endereco)!))
-                _stackCodeLines.push(stackValues(endereco: (stackVar2?.valor)!, valor: (stackVar2?.endereco)!))
+                _stackCodeLines.push(stackValues(endereco: (stackVar1?.valor), valor: (stackVar1?.endereco)))
+                _stackCodeLines.push(stackValues(endereco: (stackVar2?.valor), valor: (stackVar2?.endereco)))
                 
                 if(stackVar1?.valor ?? 0 <= stackVar2?.valor ?? 0) {
                     _stackCodeLines.push(stackValues(endereco: count, valor: 1))
@@ -416,7 +402,7 @@ class MachineCodeInterpreter {
             if(command.nodeAt(index: commands)?.value.inst == "RD") {
                 count -= 1
                 var str = readLine()
-                _stackCodeLines.push(stackValues(endereco: count, valor: Int(str!) ?? 0))
+                _stackCodeLines.push(stackValues(endereco: count, valor: Int(str) ?? 0))
 
                 
             }
@@ -428,20 +414,20 @@ class MachineCodeInterpreter {
             else
             if(command.nodeAt(index: commands)?.value.inst == "ALLOC") {
                 count += 1
-                var atrib1 = Int((command.nodeAt(index: commands)?.value.getAtrib1())!)
-                var atrib2 = Int((command.nodeAt(index: commands)?.value.getAtrib2())!)
+                var atrib1 = Int((command.nodeAt(index: commands)?.value.getAtrib1()))
+                var atrib2 = Int((command.nodeAt(index: commands)?.value.getAtrib2()))
                 
                 for k in 0..<atrib2!{
-                    _stackCodeLines.push(stackValues(endereco: atrib1! + k, valor: Int(exactly: _stackCodeLines.pop()?.getValor() ?? 0)!))
+                    _stackCodeLines.push(stackValues(endereco: atrib1 + k, valor: Int(exactly: _stackCodeLines.pop()?.getValor() ?? 0)))
                 }
             }
             if(command.nodeAt(index: commands)?.value.inst == "DALLOC") {
                 count -= 1
-                var atrib1 = Int((command.nodeAt(index: commands)?.value.getAtrib1())!)
-                var atrib2 = Int((command.nodeAt(index: commands)?.value.getAtrib2())!)
+                var atrib1 = Int((command.nodeAt(index: commands)?.value.getAtrib1()))
+                var atrib2 = Int((command.nodeAt(index: commands)?.value.getAtrib2()))
                 
                 for k in stride(from: (atrib2)! - 1, to: 0, by: -1){
-                    _stackCodeLines.push(stackValues(endereco: atrib1! + k, valor: Int(exactly: _stackCodeLines.pop()?.getValor() ?? 0)!))
+                    _stackCodeLines.push(stackValues(endereco: atrib1 + k, valor: Int(exactly: _stackCodeLines.pop()?.getValor() ?? 0)!))
                 }
             }
             if(command.nodeAt(index: commands)?.value.inst == "CALL") {
@@ -469,33 +455,7 @@ class MachineCodeInterpreter {
         
     }
     
-    func fixNullRotule(){
-        var _linkedCodeLines: LinkedList<codeLine> = LinkedList<codeLine>()
-
-        var value  = linkedCodeLines.first?.value ?? codeLine.defaultValue
-        
-        while(value.linha != -1){
-            if(value.inst == "CALL"){
-                for item in self.rotuleToReplace{
-                    if(item[0] == Int(value.atrib1 )){
-                        _linkedCodeLines.append(codeLine(linha: value.linha, inst: value.inst, atrib1: "\(item[1])", atrib2: "", com: ""))
-                    }
-                    
-                }
-            }else{
-                _linkedCodeLines.append(value)
-            }
-            
-            linkedCodeLines.nextNode()
-            value = linkedCodeLines.first?.value ?? codeLine.defaultValue
-            
-        }
-        
-        
-        linkedCodeLines.setHead(el: _linkedCodeLines.first!)
-        //print(_linkedCodeLines)
-        
-    }
+    
     
     
 }

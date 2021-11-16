@@ -33,6 +33,11 @@ struct Stack<Element> {
     mutating func push(_ element: Element) {
            items.append(element)
     }
+    
+    mutating func itemAtPosition(_ index: Int) -> Element{
+        
+        return items[index]
+    }
 
 
 
