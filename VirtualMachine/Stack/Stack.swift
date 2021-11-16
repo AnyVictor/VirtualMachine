@@ -35,8 +35,18 @@ struct Stack<Element> {
     }
     
     mutating func itemAtPosition(_ index: Int) -> Element{
-        
-        return items[index]
+
+        items[index]
+    }
+
+    func peekTwoElements() -> [Element]? {
+        let length = items.count
+        return (length >= 2 ? [items[length - 1], items[length - 2]] : nil)
+    }
+
+    mutating func getElement(index: Int) -> [Element]? {
+        let length = items.count
+        return (length >= index ? [items[index]] : nil)
     }
 
 
