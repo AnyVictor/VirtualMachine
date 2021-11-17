@@ -484,10 +484,10 @@ class MachineCodeInterpreter  {
                 
             }
             
-            stackUI[comando.linha+1]["focus"] = "true"
+//            stackUI[comando.linha+1]["focus"] = "true"
             
             
-            let str = readLine() ?? "0"
+//            let str = readLine() ?? "0"
             stackAddr()
         
         }
