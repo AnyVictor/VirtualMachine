@@ -78,86 +78,56 @@ class MachineCodeInterpreter {
         
         self.executaNormal(command: linkedCodeLines)
     }
-    
-    
+
+
     func extractCommands(){
 
-        let string = fileContent.components(separatedBy: .newlines)
-        //print(string)
-        var partial: String
-        var i = 0
-        let result: String = string.reduce(into: "") { partial, toTrim in
-            guard
-                    let range = toTrim.range(of:"\t"),
-                    range.upperBound < toTrim.endIndex
-                    else { return }
+        var array = self.fileContent.components(separatedBy: .newlines)
 
-            if(!"\(toTrim[range.upperBound..<toTrim.endIndex]) ".components(separatedBy: .whitespaces).contains("NULL")) {
+        for item in array {
 
-                var command = "\(toTrim[range.upperBound..<toTrim.endIndex]) ".components(separatedBy: .whitespaces)
-                linkedCodeLines.append(codeLine(linha: i, inst: command[0], atrib1: command[1], atrib2: command[2], com: ""))
-
-            }
-            if range.lowerBound > toTrim.startIndex  {
-                //Pega valor antes do NULL
-                //print("\(toTrim[toTrim.startIndex..<range.lowerBound])")
-                linkedCodeLines.append(codeLine(linha: i, inst: "NULL", atrib1: "\(toTrim[toTrim.startIndex..<range.lowerBound])", atrib2: "", com: ""))
-            }
-
-            i+=1
-        }
-
-        for number in 0..<(i) {
-            var linha = " "
-            var commandLine = 0
-            if(linkedCodeLines.nodeAt(index: number)?.value.inst == "JMP" || linkedCodeLines.nodeAt(index: number)?.value.inst == "JMPF" || linkedCodeLines.nodeAt(index: number)?.value.inst == "CALL" || linkedCodeLines.nodeAt(index: number)?.value.inst == "NULL") {
-
-                if(linkedCodeLines.nodeAt(index: number)?.value.inst == "JMP" || linkedCodeLines.nodeAt(index: number)?.value.inst == "JMPF" || linkedCodeLines.nodeAt(index: number)?.value.inst == "CALL") {
-                    linha = linkedCodeLines.nodeAt(index: number)?.value.getAtrib1() ?? ""
-                    //print("LINHA: ", linha)
-                    commandLine = linkedCodeLines.nodeAt(index: number)?.value.getLine() ?? 0
+            var i = 0
+            var arrChar = Array<Character>(item)
+            // remove espaços iniciais
+            if(arrChar.count != 0){
+                while(arrChar[i] == " "){
+                    i+=1
                 }
+                self.matchWithCommand(Array<Character>(arrChar[i..<arrChar.count]))
 
-                for number2 in 0..<(i) {
-                    //print("NULL? ", line.nodeAt(index: number2)?.value.inst == "NULL", linha != " ", line.nodeAt(index: number2)?.value.atrib1)
-                    if(linkedCodeLines.nodeAt(index: number2)?.value.inst == "NULL" && linha != " " && String(linkedCodeLines.nodeAt(index: number2)?.value.atrib1.trimmingCharacters(in: .whitespaces) ?? " ") == linha) {
-                        linkedCodeLines.nodeAt(index: commandLine)?.value.setAtrib1(atrib1: String(linkedCodeLines.nodeAt(index: number2)?.value.linha ?? 0))
-                    }
-                }
-
+                self.lineCounter+=1
             }
 
-        }
 
-        for number in 0..<(i) {
-            if(linkedCodeLines.nodeAt(index: number)?.value.inst == "NULL") {
-                linkedCodeLines.nodeAt(index: number)?.value.setAtrib1(atrib1: String(linkedCodeLines.nodeAt(index: number)?.value.getLine() ?? 0))
-            }
         }
+        self.fixNullRotule()
+        print(linkedCodeLines)
 
-        //print(linkedCodeLines)
-        
+        var _linkedCodeLines : LinkedList<codeLine> = LinkedList<codeLine>()
+        _linkedCodeLines.setHead(el: linkedCodeLines.first!)
+
     }
-    
+
+
     func matchWithCommand(_ value: Array<Character>){
-        
+
         var crtlCommand = 0
         var ctrlAtrib1 = 0
         var ctrlAtrib2 = 0
-        
+
         var auxCommand = ""
         var auxAtrib1 = ""
         var auxAtrib2 = ""
-        
+
         var i = 0
         var rotule = -1
         for item in value{
-            
-            if(i == 0 && item.isNumber){
+
+            if(i == 0 && item.isNumber ){
                 rotule = item.wholeNumberValue ?? -1
-            }else{
-                if(item != " "){
-                    
+            }else if(item != "\t"){
+                if(item != " " ){
+
                     if(crtlCommand == 0){
                         auxCommand.append(item)
                     }else if(ctrlAtrib1 == 0){
@@ -176,51 +146,51 @@ class MachineCodeInterpreter {
                 }
             }
             i+=1
-            
+
         }
         if(rotule != -1){
             // [toSearch, toReplace]
             rotuleToReplace.append([rotule, self.lineCounter])
-            
+
             linkedCodeLines.append(codeLine(linha: self.lineCounter, inst: "NULL", atrib1: auxAtrib1, atrib2: auxAtrib2, com: ""))
 
         }else{
             linkedCodeLines.append(codeLine(linha: self.lineCounter, inst: auxCommand, atrib1: auxAtrib1, atrib2: auxAtrib2, com: ""))
 
         }
-        
-        
+
+
         //
-     //print(linkedCodeLines)
+        //print(linkedCodeLines)
         //print(linkedCodeLines)
     }
-    
-    func fixNullRotule(){
+
+    func fixNullRotule() {
         var _linkedCodeLines: LinkedList<codeLine> = LinkedList<codeLine>()
 
-        var value  = linkedCodeLines.first?.value ?? codeLine.defaultValue
-        
-        while(value.linha != -1){
-            if(value.inst == "CALL"){
-                for item in self.rotuleToReplace{
-                    if(item[0] == Int(value.atrib1 )){
+        var value = linkedCodeLines.first?.value ?? codeLine.defaultValue
+
+        while (value.linha != -1) {
+            if (value.inst == "CALL" || value.inst == "JMP" || value.inst == "JMPF") {
+                for item in self.rotuleToReplace {
+                    if ("\(item[0])" == value.atrib1) {
                         _linkedCodeLines.append(codeLine(linha: value.linha, inst: value.inst, atrib1: "\(item[1])", atrib2: "", com: ""))
                     }
-                    
+
                 }
-            }else{
+            } else {
                 _linkedCodeLines.append(value)
             }
-            
+
             linkedCodeLines.nextNode()
             value = linkedCodeLines.first?.value ?? codeLine.defaultValue
-            
+
         }
-        
-        
+
+
         linkedCodeLines.setHead(el: _linkedCodeLines.first!)
         //print(_linkedCodeLines)
-        
+
     }
     
     func executaNormal(command: LinkedList<codeLine>) {
@@ -232,7 +202,7 @@ class MachineCodeInterpreter {
         var commands = 0
        while commands < (linhas + 1) {
             var whatever = command.nodeAt(index: commands)?.value.inst
-           //print(whatever)
+           print(whatever)
 
             if(command.nodeAt(index: commands)?.value.inst == "LDC") {
                 let value = command.nodeAt(index: commands)?.value ?? codeLine.defaultValue
@@ -445,6 +415,7 @@ class MachineCodeInterpreter {
             if(command.nodeAt(index: commands)?.value.inst == "HLT") {
                 print("ACABOOOOOU")
                 commands += 1
+                break
 
             }
             else
