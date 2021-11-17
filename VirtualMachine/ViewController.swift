@@ -22,10 +22,9 @@ class ViewController: NSViewController {
         normalRadioButton.state = NSControl.StateValue.on
     
         //let filepath = Bundle.main.path(forResource: "gera1", ofType: "txt") ?? ""
-        let filepath = FileManager.default.urls(for: .desktopDirectory, in: .userDomainMask)[0].appendingPathComponent("output.txt")
+        let filepath = FileManager.default.urls(for: .desktopDirectory, in: .userDomainMask)[0].appendingPathComponent("output34.txt")
         
             do {
-                
                 let contents = try String(contentsOf: filepath)
                 let VirtualMachine : MachineCodeInterpreter = MachineCodeInterpreter(fileContent: contents)
                 

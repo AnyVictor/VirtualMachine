@@ -7,6 +7,7 @@ import Cocoa
 
 
 struct codeLine  {
+
     static var defaultValue:  codeLine = codeLine(linha: -1, inst: "", atrib1: "", atrib2: "", com: "")
     var linha: Int
     var inst: String
@@ -51,8 +52,6 @@ struct stackValues {
     static var defaultValue:  stackValues = stackValues(endereco: -1, valor: -1)
     var endereco: Int
     var valor: Int
-  
-    
 }
 
 class MachineCodeInterpreter {
@@ -62,27 +61,21 @@ class MachineCodeInterpreter {
     var _stackCodeLines = Stack<stackValues>()
     var lineCounter : Int
     var rotuleToReplace: [[Int]] = []
-
     
     init(fileContent: String) {
         self.fileContent = fileContent
-        self.linkedCodeLines = LinkedList<codeLine>()
-        self.lineCounter = 0
-        
-    }
-    
- 
-    
-    func analyser() {
-        self.extractCommands()
-        
-        self.executaNormal(command: linkedCodeLines)
+        linkedCodeLines = LinkedList<codeLine>()
+        lineCounter = 0
     }
 
+    func analyser() {
+        extractCommands()
+        executaNormal(command: linkedCodeLines)
+    }
 
     func extractCommands(){
 
-        var array = self.fileContent.components(separatedBy: .newlines)
+        var array = fileContent.components(separatedBy: .newlines)
 
         for item in array {
 
@@ -93,21 +86,19 @@ class MachineCodeInterpreter {
                 while(arrChar[i] == " "){
                     i+=1
                 }
-                self.matchWithCommand(Array<Character>(arrChar[i..<arrChar.count]))
-
-                self.lineCounter+=1
+                matchWithCommand(Array<Character>(arrChar[i..<arrChar.count]))
+                lineCounter+=1
             }
 
 
         }
-        self.fixNullRotule()
+
+        fixNullRotule()
         print(linkedCodeLines)
 
         var _linkedCodeLines : LinkedList<codeLine> = LinkedList<codeLine>()
         _linkedCodeLines.setHead(el: linkedCodeLines.first!)
-
     }
-
 
     func matchWithCommand(_ value: Array<Character>){
 
@@ -158,11 +149,6 @@ class MachineCodeInterpreter {
             linkedCodeLines.append(codeLine(linha: self.lineCounter, inst: auxCommand, atrib1: auxAtrib1, atrib2: auxAtrib2, com: ""))
 
         }
-
-
-        //
-        //print(linkedCodeLines)
-        //print(linkedCodeLines)
     }
 
     func fixNullRotule() {
@@ -184,38 +170,33 @@ class MachineCodeInterpreter {
 
             linkedCodeLines.nextNode()
             value = linkedCodeLines.first?.value ?? codeLine.defaultValue
-
         }
 
-
         linkedCodeLines.setHead(el: _linkedCodeLines.first!)
-        //print(_linkedCodeLines)
-
     }
     
     func executaNormal(command: LinkedList<codeLine>) {
+
         let linhas = command.last?.value.linha ?? -1
         var count = -1
         var atrib = 0
         var linha = 0
-
         var commands = 0
+
        while commands < (linhas + 1) {
             var whatever = command.nodeAt(index: commands)?.value.inst
            print(whatever)
 
-            if(command.nodeAt(index: commands)?.value.inst == "LDC") {
+           if(command.nodeAt(index: commands)?.value.inst == "LDC") {
                 let value = command.nodeAt(index: commands)?.value ?? codeLine.defaultValue
                 _stackCodeLines.push(stackValues(endereco: _stackCodeLines.items.count, valor: Int(value.atrib1) ?? -1))
                 count += 1
                 commands += 1
             }
-            else
-            if(command.nodeAt(index: commands)?.value.inst == "NULL") {
+            else if(command.nodeAt(index: commands)?.value.inst == "NULL") {
                 commands += 1
             }
-            else
-            if(command.nodeAt(index: commands)?.value.inst == "LDV") {
+            else if(command.nodeAt(index: commands)?.value.inst == "LDV") {
                 count += 1
 
                 let value = Int(command.nodeAt(index: commands)?.value.getAtrib1() ?? "")
@@ -224,47 +205,41 @@ class MachineCodeInterpreter {
                 _stackCodeLines.push(stackValues(endereco: _stackCodeLines.items.count, valor: aux.valor))
                 commands += 1
             }
-            else
-            if(command.nodeAt(index: commands)?.value.inst == "ADD") {
+            else if(command.nodeAt(index: commands)?.value.inst == "ADD") {
                 let add = (_stackCodeLines.items[_stackCodeLines.items.count - 2].valor) + (_stackCodeLines.items[_stackCodeLines.items.count - 1].valor)
                 _stackCodeLines.items[_stackCodeLines.items.count - 2].valor = add
                 _stackCodeLines.pop()
                 commands += 1
 
             }
-            else
-            if(command.nodeAt(index: commands)?.value.inst == "SUB") {
+            else if(command.nodeAt(index: commands)?.value.inst == "SUB") {
                 let sub = (_stackCodeLines.items[_stackCodeLines.items.count - 2].valor) - (_stackCodeLines.items[_stackCodeLines.items.count - 1].valor)
                 _stackCodeLines.items[_stackCodeLines.items.count - 2].valor = sub
                 _stackCodeLines.pop()
                 commands += 1
 
             }
-            else
-            if(command.nodeAt(index: commands)?.value.inst == "MULT") {
+            else if(command.nodeAt(index: commands)?.value.inst == "MULT") {
                 let mult = (_stackCodeLines.items[_stackCodeLines.items.count - 2].valor) * (_stackCodeLines.items[_stackCodeLines.items.count - 1].valor)
                 _stackCodeLines.items[_stackCodeLines.items.count - 2].valor = mult
                 _stackCodeLines.pop()
                 commands += 1
 
             }
-            else
-            if(command.nodeAt(index: commands)?.value.inst == "DIVI") {
+            else if(command.nodeAt(index: commands)?.value.inst == "DIVI") {
                 let div = (_stackCodeLines.items[_stackCodeLines.items.count - 2].valor) / (_stackCodeLines.items[_stackCodeLines.items.count - 1].valor)
                 _stackCodeLines.items[_stackCodeLines.items.count - 2].valor = div
                 _stackCodeLines.pop()
                 commands += 1
 
             }
-            else
-            if(command.nodeAt(index: commands)?.value.inst == "INV") {
+            else if(command.nodeAt(index: commands)?.value.inst == "INV") {
                 let inv = -(_stackCodeLines.items[_stackCodeLines.items.count - 1].valor);
                 _stackCodeLines.items[_stackCodeLines.items.count - 1].valor = inv
                 commands += 1
 
             }
-            else
-            if(command.nodeAt(index: commands)?.value.inst == "AND") {
+            else if(command.nodeAt(index: commands)?.value.inst == "AND") {
                 let aux1 = _stackCodeLines.itemAtPosition(_stackCodeLines.items.count - 1 ?? 0)
 
                 let aux2 = _stackCodeLines.itemAtPosition(_stackCodeLines.items.count - 2 ?? 0)
@@ -279,8 +254,7 @@ class MachineCodeInterpreter {
                 commands += 1
 
             }
-            else
-            if(command.nodeAt(index: commands)?.value.inst == "OR") {
+            else if(command.nodeAt(index: commands)?.value.inst == "OR") {
                 let aux1 = _stackCodeLines.itemAtPosition(_stackCodeLines.items.count - 1 ?? 0)
 
                 let aux2 = _stackCodeLines.itemAtPosition(_stackCodeLines.items.count - 2 ?? 0)
@@ -295,15 +269,13 @@ class MachineCodeInterpreter {
                 commands += 1
 
             }
-            else
-            if(command.nodeAt(index: commands)?.value.inst == "NEG") {
+            else if(command.nodeAt(index: commands)?.value.inst == "NEG") {
                 let neg = (1 - (_stackCodeLines.items[_stackCodeLines.items.count - 1].valor));
                 _stackCodeLines.items[_stackCodeLines.items.count - 1].valor = neg
                 commands += 1
 
             }
-            else
-            if(command.nodeAt(index: commands)?.value.inst == "CME") {
+            else if(command.nodeAt(index: commands)?.value.inst == "CME") {
 
                 let aux1 = _stackCodeLines.itemAtPosition(_stackCodeLines.items.count - 1 ?? 0)
 
@@ -319,8 +291,7 @@ class MachineCodeInterpreter {
                 commands += 1
 
             }
-            else
-            if(command.nodeAt(index: commands)?.value.inst == "CMA") {
+            else if(command.nodeAt(index: commands)?.value.inst == "CMA") {
 
                 let aux1 = _stackCodeLines.itemAtPosition(_stackCodeLines.items.count - 1 ?? 0)
 
@@ -336,8 +307,7 @@ class MachineCodeInterpreter {
                 commands += 1
 
             }
-            else
-            if(command.nodeAt(index: commands)?.value.inst == "CEQ") {
+            else if(command.nodeAt(index: commands)?.value.inst == "CEQ") {
 
                 let aux1 = _stackCodeLines.itemAtPosition(_stackCodeLines.items.count - 1 ?? 0)
 
@@ -354,8 +324,7 @@ class MachineCodeInterpreter {
 
 
             }
-            else
-            if(command.nodeAt(index: commands)?.value.inst == "CDIF") {
+            else if(command.nodeAt(index: commands)?.value.inst == "CDIF") {
 
                 let aux1 = _stackCodeLines.itemAtPosition(_stackCodeLines.items.count - 1 ?? 0)
 
@@ -371,8 +340,7 @@ class MachineCodeInterpreter {
                 commands += 1
 
             }
-            else
-            if(command.nodeAt(index: commands)?.value.inst == "CMEQ") {
+            else if(command.nodeAt(index: commands)?.value.inst == "CMEQ") {
 
                 let aux1 = _stackCodeLines.itemAtPosition(_stackCodeLines.items.count - 1 ?? 0)
 
@@ -388,8 +356,7 @@ class MachineCodeInterpreter {
                 commands += 1
 
             }
-            else
-            if(command.nodeAt(index: commands)?.value.inst == "CMAQ") {
+            else if(command.nodeAt(index: commands)?.value.inst == "CMAQ") {
 
                 let aux1 = _stackCodeLines.itemAtPosition(_stackCodeLines.items.count - 1 ?? 0)
 
@@ -405,42 +372,39 @@ class MachineCodeInterpreter {
                 commands += 1
 
             }
-            else
-            if(command.nodeAt(index: commands)?.value.inst == "START") {
+            else if(command.nodeAt(index: commands)?.value.inst == "START") {
                 var _stackCodeLines = Stack<stackValues>()
                 commands += 1
 
             }
-            else
-            if(command.nodeAt(index: commands)?.value.inst == "HLT") {
-                print("ACABOOOOOU")
+            else if(command.nodeAt(index: commands)?.value.inst == "HLT") {
+                print("ACABOOOOOU!")
                 commands += 1
                 break
-
             }
-            else
-            if(command.nodeAt(index: commands)?.value.inst == "STR") {
-                if let end = Int((command.nodeAt(index: commands)?.value.getAtrib1() ?? "")) {
+            else if(command.nodeAt(index: commands)?.value.inst == "STR") {
+
+                if let endereco = Int((command.nodeAt(index: commands)?.value.getAtrib1() ?? "")) {
                     let aux = _stackCodeLines.itemAtPosition(_stackCodeLines.items.count - 1)
-                    _stackCodeLines.items[end].valor = aux.valor
+                    _stackCodeLines.items[endereco].valor = aux.valor
                     _stackCodeLines.pop()
                     commands += 1
                     count += 1
                 }
+
             }
-            else
-            if(command.nodeAt(index: commands)?.value.inst == "JMP") {
-                let optionalString: String? = command.nodeAt(index: commands)?.value.getAtrib1()
-                if let string = optionalString, let myInt = Int(string) {
+            else if(command.nodeAt(index: commands)?.value.inst == "JMP") {
+                let atribuicao1: String? = command.nodeAt(index: commands)?.value.getAtrib1()
+                if let string = atribuicao1, let atrib1 = Int(string) {
                      //print("Int : \(myInt)")
-                    commands = myInt + 1
+                    commands = atrib1 + 1
                 }
 
             }
-            else
-            if(command.nodeAt(index: commands)?.value.inst == "JMPF") {
+            else if(command.nodeAt(index: commands)?.value.inst == "JMPF") {
                 count -= 1
                 let aux = _stackCodeLines.itemAtPosition(_stackCodeLines.items.count - 1).valor
+
                 if(aux == 0) {
                     let aux = Int(command.nodeAt(index: commands)?.value.getAtrib1() ?? "")
                     commands = aux ?? 0
@@ -448,26 +412,25 @@ class MachineCodeInterpreter {
                 else {
                     commands+=1
                 }
+
                 _stackCodeLines.pop()
 
             }
-            else
-            if(command.nodeAt(index: commands)?.value.inst == "RD") {
+            else if(command.nodeAt(index: commands)?.value.inst == "RD") {
                 count += 1
                 print("Digite um valor: ")
                 var str = readLine() ?? ""
                 _stackCodeLines.push(stackValues(endereco: _stackCodeLines.items.count, valor: Int(str) ?? 0))
-
                 commands += 1
+
             }
-            else
-            if(command.nodeAt(index: commands)?.value.inst == "PRN") {
+            else if(command.nodeAt(index: commands)?.value.inst == "PRN") {
                 print("Saida: ",(_stackCodeLines.peek()?.valor ?? ""))
                 _stackCodeLines.pop()
                 commands += 1
+
             }
-            else
-            if(command.nodeAt(index: commands)?.value.inst == "ALLOC") {
+            else if(command.nodeAt(index: commands)?.value.inst == "ALLOC") {
 
                 var atrib1 = Int((command.nodeAt(index: commands)?.value.atrib1 ?? ""))!
                 var atrib2 = Int((command.nodeAt(index: commands)?.value.getAtrib2() ?? ""))
@@ -481,10 +444,10 @@ class MachineCodeInterpreter {
                         _stackCodeLines.push(stackValues(endereco: _stackCodeLines.items.count, valor: _stackCodeLines.peek()?.valor ?? 0))
                     }
                 }
+
                 commands += 1
 
-            }else
-            if(command.nodeAt(index: commands)?.value.inst == "DALLOC") {
+            }else if(command.nodeAt(index: commands)?.value.inst == "DALLOC") {
 
                 var atrib1 = Int((command.nodeAt(index: commands)?.value.atrib1 ?? ""))!
                 var atrib2 = Int((command.nodeAt(index: commands)?.value.getAtrib2() ?? ""))
@@ -495,35 +458,26 @@ class MachineCodeInterpreter {
                     _stackCodeLines.items[atrib1 + k].valor = aux.valor
                     _stackCodeLines.pop()
                 }
+
                 commands += 1
 
-            }else
-            if(command.nodeAt(index: commands)?.value.inst == "CALL") {
+            }else if(command.nodeAt(index: commands)?.value.inst == "CALL") {
+
                 count += 1
-                let optionalString: String? = command.nodeAt(index: commands)?.value.getAtrib1()
-                if let string = optionalString, let myInt = Int(string) {
+                let atribuicao1: String? = command.nodeAt(index: commands)?.value.getAtrib1()
+
+                if let string = atribuicao1, let atribuicao1 = Int(string) {
                     var x = commands
                     x += 1
-                    commands = myInt
+                    commands = atribuicao1
                     _stackCodeLines.push(stackValues(endereco: _stackCodeLines.items.count, valor: x))
-
                 }
-            }else
-            if(command.nodeAt(index: commands)?.value.inst == "RETURN") {
 
+            }else if(command.nodeAt(index: commands)?.value.inst == "RETURN") {
                      commands = _stackCodeLines.itemAtPosition(_stackCodeLines.items.count - 1).valor
-                    //print("TAMANHO: ", commands)
                     _stackCodeLines.pop()
-                    //commands += 1
-
             }
-            
-            
         }
         
     }
-    
-    
-    
-    
 }
