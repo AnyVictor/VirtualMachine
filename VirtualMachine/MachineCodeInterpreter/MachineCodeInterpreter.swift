@@ -23,32 +23,36 @@ struct stackValues {
     
 }
 
-class MachineCodeInterpreter {
+
+
+class MachineCodeInterpreter  {
     
     var fileContent: String
     var linkedCodeLines: LinkedList<codeLine>
     var _stackCodeLines = Stack<stackValues>()
     var lineCounter : Int
     var rotuleToReplace: [[Int]] = []
-
+    /*var stackUI :  [[String: String]] = [["endereco":"2", "valor":"12"]]
+    var stackAddr: NSTableView*/
     
     init(fileContent: String) {
         self.fileContent = fileContent
         self.linkedCodeLines = LinkedList<codeLine>()
         self.lineCounter = 0
-        
+      
+        //stackAddr.reloadData()
     }
-    
  
     
-    func analyser() {
-        self.extractCommands()
+    func analyser(stackUI : inout [[String: String]], stackAddr: () -> Void) {
+        self.extractCommands(stackUI: &stackUI)
         
-        self.executaNormal(command: linkedCodeLines)
+        stackAddr()
+        self.executaNormal(command: linkedCodeLines, stackUI: &stackUI, stackAddr: stackAddr )
     }
     
     
-    func extractCommands(){
+    func extractCommands(stackUI : inout [[String: String]]){
         
         var array = self.fileContent.components(separatedBy: .newlines)
 
@@ -72,6 +76,22 @@ class MachineCodeInterpreter {
         }
         self.fixNullRotule()
         print(linkedCodeLines)
+        
+        var _linkedCodeLines : LinkedList<codeLine> = LinkedList<codeLine>()
+        _linkedCodeLines.setHead(el: linkedCodeLines.first!)
+
+        
+        var value  = _linkedCodeLines.first?.value ?? codeLine.defaultValue
+        stackUI.remove(at: 0)
+        while(value.linha != -1){
+            
+            stackUI.append(["linha": "\(value.linha)", "instrucao": "\(value.inst)", "atributo1": "\(value.atrib1)", "atributo2":"\(value.atrib2)", "comentario": "\(value.com)", "focus": "false"])
+            
+            _linkedCodeLines.nextNode()
+            
+            value = _linkedCodeLines.first?.value ?? codeLine.defaultValue
+            
+        }
         
     }
     
@@ -137,14 +157,15 @@ class MachineCodeInterpreter {
         var value  = linkedCodeLines.first?.value ?? codeLine.defaultValue
         
         while(value.linha != -1){
-            if(value.inst == "CALL"){
+            if(value.inst == "CALL" || value.inst == "JMP" || value.inst == "JMPF"){
                 for item in self.rotuleToReplace{
-                    if(item[0] == Int(value.atrib1 )){
+                    if("\(item[0])" == value.atrib1){
                         _linkedCodeLines.append(codeLine(linha: value.linha, inst: value.inst, atrib1: "\(item[1])", atrib2: "", com: ""))
                     }
                     
                 }
-            }else{
+            }
+            else{
                 _linkedCodeLines.append(value)
             }
             
@@ -159,300 +180,319 @@ class MachineCodeInterpreter {
         
     }
     
-    func executaNormal(command: LinkedList<codeLine>) {
-        let linhas = command.last?.value.linha ?? -1
-        var count = 0
-        var atrib = 0
-        for commands in 0..<(linhas+1) {
+    func executaNormal(command: LinkedList<codeLine>, stackUI : inout [[String: String]], stackAddr: () -> Void) {
+        
+        
+        var commands = -1
+        var count = -1
+        while(true){
             
-            if(command.nodeAt(index: commands)?.value.inst == "LDC") {
+            let comando = command.nodeAt(index: commands)?.value ?? codeLine.defaultValue
+            
+            if(comando.inst == "LDC") {
                 count += 1
-                let value = command.nodeAt(index: commands)?.value ?? codeLine.defaultValue
+                let value = comando
                
                 _stackCodeLines.push(stackValues(endereco: count, valor: Int(value.atrib1) ?? -1))
             }
             else
-            if(command.nodeAt(index: commands)?.value.inst == "LDV") {
+            if(comando.inst == "LDV") {
                 count += 1
-                let value = command.nodeAt(index: commands)?.value ?? codeLine.defaultValue
+                let value = comando 
                 let valueInStack = _stackCodeLines.itemAtPosition(Int(value.atrib1) ?? 0)
                 
                 _stackCodeLines.push(stackValues(endereco: count, valor: valueInStack.valor))
             }
             else
-            if(command.nodeAt(index: commands)?.value.inst == "ADD") {
-                count -= 1
-                let soma = (_stackCodeLines.pop()?.valor ?? 0) + (_stackCodeLines.pop()?.valor ?? 0)
-                print("SOMA: ", soma)
-            }
-            else
-            if(command.nodeAt(index: commands)?.value.inst == "SUB") {
-                count -= 1
-                let sub = (_stackCodeLines.pop()?.valor ?? 0) - (_stackCodeLines.pop()?.valor ?? 0)
-                print("SUB: ", sub)
-            }
-            else
-            if(command.nodeAt(index: commands)?.value.inst == "MULT") {
-                count -= 1
-                let mult = (_stackCodeLines.pop()?.valor ?? 0) * (_stackCodeLines.pop()?.valor ?? 0)
-                print("MULT: ", mult)
-            }
-//            else
-//            if(command.nodeAt(index: commands)?.value.inst == "DIVI") {
-//                count -= 1
-//                let div = (_stackCodeLines.pop()?.valor ?? 0)! / (_stackCodeLines.pop()?.valor)!
-//                print("DIVI: ", div)
-//            }
-            else
-            if(command.nodeAt(index: commands)?.value.inst == "INV") {
-                let inv = -(_stackCodeLines.pop()?.valor ?? 0)
-                print("INV: ", inv)
-            }
-            else
-            if(command.nodeAt(index: commands)?.value.inst == "AND") {
-                count -= 1
-                let stackVar1 = _stackCodeLines.pop() ?? stackValues.defaultValue
-                let stackVar2 = _stackCodeLines.pop() ?? stackValues.defaultValue
-
-                _stackCodeLines.push(stackValues(endereco: Int(stackVar1.valor), valor: Int(stackVar1.endereco)))
-                _stackCodeLines.push(stackValues(endereco: Int(stackVar2.valor), valor: Int(stackVar2.endereco)))
+            if(comando.inst == "ADD") {
+                let soma = _stackCodeLines.itemAtPosition(count - 1).valor + _stackCodeLines.itemAtPosition(count).valor
                 
-                if(stackVar1.valor == 1 && stackVar2.valor == 1) {
-                    _stackCodeLines.push(stackValues(endereco: count, valor: 1))
+                count-=1
+                
+                _stackCodeLines.inserAtPosition(count, stackValues(endereco: count, valor: soma))
+            }
+            else
+            if(comando.inst == "SUB") {
+                let sub = _stackCodeLines.itemAtPosition(count - 1).valor - _stackCodeLines.itemAtPosition(count).valor
+                
+                count-=1
+                
+                _stackCodeLines.inserAtPosition(count, stackValues(endereco: count, valor: sub))
+            }
+            else
+            if(comando.inst == "MULT") {
+                let mult = _stackCodeLines.itemAtPosition(count - 1).valor * _stackCodeLines.itemAtPosition(count).valor
+                
+                count -= 1
+                
+                _stackCodeLines.inserAtPosition(count, stackValues(endereco: count, valor: mult))
+            }
+           else
+            if(comando.inst == "DIVI") {
+                let div = _stackCodeLines.itemAtPosition(count - 1).valor / _stackCodeLines.itemAtPosition(count).valor
+                
+                count-=1
+                
+                _stackCodeLines.inserAtPosition(count, stackValues(endereco: count, valor: div))
+           }
+            else
+            if(comando.inst == "INV") {
+                let inv = _stackCodeLines.itemAtPosition(count).valor * -1
+                
+               
+                
+                _stackCodeLines.inserAtPosition(count, stackValues(endereco: count, valor: inv))
+            }
+            else
+            if(comando.inst == "AND") {
+                
+                let stackVar1 = _stackCodeLines.itemAtPosition(count - 1).valor
+                let stackVar2 = _stackCodeLines.itemAtPosition(count).valor
+
+                count -= 1
+                if(stackVar1 == 1 && stackVar2 == 1) {
+                    _stackCodeLines.inserAtPosition(count, stackValues(endereco: count, valor: 1))
                 }
                 else {
-                    _stackCodeLines.push(stackValues(endereco: count, valor: 0))
+                    _stackCodeLines.inserAtPosition(count, stackValues(endereco: count, valor: 0))
 
                 }
             }
             else
-            if(command.nodeAt(index: commands)?.value.inst == "OR") {
-                count -= 1
-                let stackVar1 = _stackCodeLines.pop() ?? stackValues.defaultValue
-                let stackVar2 = _stackCodeLines.pop() ?? stackValues.defaultValue
+            if(comando.inst == "OR") {
+                let stackVar1 = _stackCodeLines.itemAtPosition(count - 1).valor
+                let stackVar2 = _stackCodeLines.itemAtPosition(count).valor
 
-                _stackCodeLines.push(stackValues(endereco: Int(stackVar1.valor), valor: Int(stackVar1.endereco) ))
-                _stackCodeLines.push(stackValues(endereco: Int(stackVar2.valor), valor: Int(stackVar2.endereco) ))
-                
-                if(stackVar1.valor == 1 || stackVar2.valor == 1) {
-                    _stackCodeLines.push(stackValues(endereco: count, valor: 1))
+                count -= 1
+                if(stackVar1 == 1 || stackVar2 == 1) {
+                    _stackCodeLines.inserAtPosition(count, stackValues(endereco: count, valor: 1))
                 }
                 else {
-                    _stackCodeLines.push(stackValues(endereco: count, valor: 0))
+                    _stackCodeLines.inserAtPosition(count, stackValues(endereco: count, valor: 0))
 
                 }
             }
             else
-            if(command.nodeAt(index: commands)?.value.inst == "NEG") {
-                let neg = (1 - Int(_stackCodeLines.pop()?.valor));
-                _stackCodeLines.push(stackValues(endereco: count, valor: neg))
+            if(comando.inst == "NEG") {
+                let stackVar1 = _stackCodeLines.itemAtPosition(count).valor
+
+                _stackCodeLines.inserAtPosition(count, stackValues(endereco: count, valor: 1 - stackVar1))
+                
             }
             else
-            if(command.nodeAt(index: commands)?.value.inst == "CME") {
+            if(comando.inst == "CME") {
                 
-                count -= 1
-                let stackVar1 = _stackCodeLines.pop()
-                let stackVar2 = _stackCodeLines.pop()
+                let stackVar1 = _stackCodeLines.itemAtPosition(count - 1).valor
+                let stackVar2 = _stackCodeLines.itemAtPosition(count).valor
 
-                _stackCodeLines.push(stackValues(endereco: (stackVar1?.valor), valor: (stackVar1?.endereco)))
-                _stackCodeLines.push(stackValues(endereco: (stackVar2?.valor), valor: (stackVar2?.endereco)))
-                
-                if(stackVar1?.valor ?? 0 > stackVar2?.valor ?? 0) {
-                    _stackCodeLines.push(stackValues(endereco: count, valor: 1))
+                count -= 1
+                if(stackVar1 < stackVar2) {
+                    _stackCodeLines.inserAtPosition(count, stackValues(endereco: count, valor: 1))
                 }
                 else {
-                    _stackCodeLines.push(stackValues(endereco: count, valor: 0))
+                    _stackCodeLines.inserAtPosition(count, stackValues(endereco: count, valor: 0))
 
                 }
                 
             }
             else
-            if(command.nodeAt(index: commands)?.value.inst == "CMA") {
+            if(comando.inst == "CMA") {
                 
-                count -= 1
-                let stackVar1 = _stackCodeLines.pop()
-                let stackVar2 = _stackCodeLines.pop()
+                let stackVar1 = _stackCodeLines.itemAtPosition(count - 1).valor
+                let stackVar2 = _stackCodeLines.itemAtPosition(count).valor
 
-                _stackCodeLines.push(stackValues(endereco: (stackVar1?.valor), valor: (stackVar1?.endereco)))
-                _stackCodeLines.push(stackValues(endereco: (stackVar2?.valor), valor: (stackVar2?.endereco)))
-                
-                if(stackVar1?.valor ?? 0 < stackVar2?.valor ?? 0) {
-                    _stackCodeLines.push(stackValues(endereco: count, valor: 1))
+                count -= 1
+                if(stackVar1 > stackVar2) {
+                    _stackCodeLines.inserAtPosition(count, stackValues(endereco: count, valor: 1))
                 }
                 else {
-                    _stackCodeLines.push(stackValues(endereco: count, valor: 0))
+                    _stackCodeLines.inserAtPosition(count, stackValues(endereco: count, valor: 0))
 
                 }
                 
             }
             else
-            if(command.nodeAt(index: commands)?.value.inst == "CEQ") {
+            if(comando.inst == "CEQ") {
                 
-                count -= 1
-                let stackVar1 = _stackCodeLines.pop()
-                let stackVar2 = _stackCodeLines.pop()
+                let stackVar1 = _stackCodeLines.itemAtPosition(count - 1).valor
+                let stackVar2 = _stackCodeLines.itemAtPosition(count).valor
 
-                _stackCodeLines.push(stackValues(endereco: (stackVar1?.valor), valor: (stackVar1?.endereco)))
-                _stackCodeLines.push(stackValues(endereco: (stackVar2?.valor), valor: (stackVar2?.endereco)))
-                
-                if(stackVar1?.valor ?? 0 == stackVar2?.valor ?? 0) {
-                    _stackCodeLines.push(stackValues(endereco: count, valor: 1))
+                count -= 1
+                if(stackVar1 == stackVar2) {
+                    _stackCodeLines.inserAtPosition(count, stackValues(endereco: count, valor: 1))
                 }
                 else {
-                    _stackCodeLines.push(stackValues(endereco: count, valor: 0))
+                    _stackCodeLines.inserAtPosition(count, stackValues(endereco: count, valor: 0))
 
                 }
                 
             }
             else
-            if(command.nodeAt(index: commands)?.value.inst == "CDIF") {
+            if(comando.inst == "CDIF") {
                 
-                count -= 1
-                let stackVar1 = _stackCodeLines.pop()
-                let stackVar2 = _stackCodeLines.pop()
+                let stackVar1 = _stackCodeLines.itemAtPosition(count - 1).valor
+                let stackVar2 = _stackCodeLines.itemAtPosition(count).valor
 
-                _stackCodeLines.push(stackValues(endereco: (stackVar1?.valor), valor: (stackVar1?.endereco)))
-                _stackCodeLines.push(stackValues(endereco: (stackVar2?.valor), valor: (stackVar2?.endereco)))
-                
-                if(stackVar1?.valor ?? 0 != stackVar2?.valor ?? 0) {
-                    _stackCodeLines.push(stackValues(endereco: count, valor: 1))
+                count -= 1
+                if(stackVar1 != stackVar2) {
+                    _stackCodeLines.inserAtPosition(count, stackValues(endereco: count, valor: 1))
                 }
                 else {
-                    _stackCodeLines.push(stackValues(endereco: count, valor: 0))
+                    _stackCodeLines.inserAtPosition(count, stackValues(endereco: count, valor: 0))
 
                 }
                 
             }
             else
-            if(command.nodeAt(index: commands)?.value.inst == "CMEQ") {
+            if(comando.inst == "CMEQ") {
                 
-                count -= 1
-                let stackVar1 = _stackCodeLines.pop()
-                let stackVar2 = _stackCodeLines.pop()
+                let stackVar1 = _stackCodeLines.itemAtPosition(count - 1).valor
+                let stackVar2 = _stackCodeLines.itemAtPosition(count).valor
 
-                _stackCodeLines.push(stackValues(endereco: (stackVar1?.valor), valor: (stackVar1?.endereco)))
-                _stackCodeLines.push(stackValues(endereco: (stackVar2?.valor), valor: (stackVar2?.endereco)))
-                
-                if(stackVar1?.valor ?? 0 >= stackVar2?.valor ?? 0) {
-                    _stackCodeLines.push(stackValues(endereco: count, valor: 1))
+                count -= 1
+                if(stackVar1 <= stackVar2) {
+                    _stackCodeLines.inserAtPosition(count, stackValues(endereco: count, valor: 1))
                 }
                 else {
-                    _stackCodeLines.push(stackValues(endereco: count, valor: 0))
+                    _stackCodeLines.inserAtPosition(count, stackValues(endereco: count, valor: 0))
 
                 }
                 
             }
             else
-            if(command.nodeAt(index: commands)?.value.inst == "CMAQ") {
+            if(comando.inst == "CMAQ") {
                 
-                count -= 1
-                let stackVar1 = _stackCodeLines.pop()
-                let stackVar2 = _stackCodeLines.pop()
+                let stackVar1 = _stackCodeLines.itemAtPosition(count - 1).valor
+                let stackVar2 = _stackCodeLines.itemAtPosition(count).valor
 
-                _stackCodeLines.push(stackValues(endereco: (stackVar1?.valor), valor: (stackVar1?.endereco)))
-                _stackCodeLines.push(stackValues(endereco: (stackVar2?.valor), valor: (stackVar2?.endereco)))
-                
-                if(stackVar1?.valor ?? 0 <= stackVar2?.valor ?? 0) {
-                    _stackCodeLines.push(stackValues(endereco: count, valor: 1))
+                count -= 1
+                if(stackVar1 >= stackVar2) {
+                    _stackCodeLines.inserAtPosition(count, stackValues(endereco: count, valor: 1))
                 }
                 else {
-                    _stackCodeLines.push(stackValues(endereco: count, valor: 0))
+                    _stackCodeLines.inserAtPosition(count, stackValues(endereco: count, valor: 0))
 
                 }
                 
             }
             else
-            if(command.nodeAt(index: commands)?.value.inst == "START") {
-                var _stackCodeLines = Stack<stackValues>()
+            if(comando.inst == "START") {
+                
+                count -= 1
             }
             else
-            if(command.nodeAt(index: commands)?.value.inst == "HLT") {
+            if(comando.inst == "HLT") {
                 print("ACABOOOOOU")
+                break
             }
             else
-            if(command.nodeAt(index: commands)?.value.inst == "STR") {
-                var end = command.nodeAt(index: commands)?.value.getAtrib1()
-                _stackCodeLines.pop()
-            }
-            else
-            if(command.nodeAt(index: commands)?.value.inst == "JMP") {
-                let optionalString: String? = command.nodeAt(index: commands)?.value.getAtrib1()
-                if let string = optionalString, let myInt = Int(string) {
-                     print("Int : \(myInt)")
-                    atrib = myInt
-                }
+            if(comando.inst == "STR") {
                 
-                _stackCodeLines.pop()
-            }
-            else
-            if(command.nodeAt(index: commands)?.value.inst == "JMPF") {
+                let contentS = _stackCodeLines.itemAtPosition(count).valor
+                _stackCodeLines.inserAtPosition(Int(comando.atrib1) ?? -1, stackValues(endereco: count, valor: contentS))
                 count -= 1
-                var atribs = _stackCodeLines.pop()
-                if(atribs?.valor == 0) {
-                    let optionalString: String? = command.nodeAt(index: commands)?.value.getAtrib1()
-                    if let string = optionalString, let myInt = Int(string) {
-                         print("Int : \(myInt)")
-                        atrib = myInt
-                    }
-                    
-                    _stackCodeLines.pop()
-                }
-            }
-            else
-            if(command.nodeAt(index: commands)?.value.inst == "RD") {
-                count -= 1
-                var str = readLine()
-                _stackCodeLines.push(stackValues(endereco: count, valor: Int(str) ?? 0))
 
                 
             }
             else
-            if(command.nodeAt(index: commands)?.value.inst == "PRN") {
-                print("Saida: ",_stackCodeLines.pop())
+            if(comando.inst == "JMP") {
+                
+                let content = Int(comando.atrib1) ?? 0
+
+                commands = content
+            }
+            else
+            if(comando.inst == "JMPF") {
+                let content = Int(comando.atrib1) ?? 0
+                
+                if(content == 0){
+                    commands = content
+                }//else commands +=1 - so dexa rola
+                
+                count-=1
+                
+                
+                
                 
             }
             else
-            if(command.nodeAt(index: commands)?.value.inst == "ALLOC") {
+            if(comando.inst == "RD") {
                 count += 1
-                var atrib1 = Int((command.nodeAt(index: commands)?.value.getAtrib1()))
-                var atrib2 = Int((command.nodeAt(index: commands)?.value.getAtrib2()))
+                let str = readLine() ?? "0"
+
+                _stackCodeLines.inserAtPosition(count, stackValues(endereco: count, valor: Int(str) ?? 0))
+
                 
-                for k in 0..<atrib2!{
-                    _stackCodeLines.push(stackValues(endereco: atrib1 + k, valor: Int(exactly: _stackCodeLines.pop()?.getValor() ?? 0)))
-                }
             }
-            if(command.nodeAt(index: commands)?.value.inst == "DALLOC") {
+            else
+            if(comando.inst == "PRN") {
+                let content = _stackCodeLines.itemAtPosition(count).valor
                 count -= 1
-                var atrib1 = Int((command.nodeAt(index: commands)?.value.getAtrib1()))
-                var atrib2 = Int((command.nodeAt(index: commands)?.value.getAtrib2()))
+                print("Saida: \(content)")
                 
-                for k in stride(from: (atrib2)! - 1, to: 0, by: -1){
-                    _stackCodeLines.push(stackValues(endereco: atrib1 + k, valor: Int(exactly: _stackCodeLines.pop()?.getValor() ?? 0)!))
+            }
+            else
+            if(comando.inst == "ALLOC") {
+                count += 1
+                let v = command.nodeAt(index: commands)?.value ?? codeLine.defaultValue
+                
+                let atrib1 = Int(v.atrib1) ?? 0
+                let atrib2 = Int(v.atrib2) ?? 0
+                
+                for k in 0..<atrib2{
+                    _stackCodeLines.push(stackValues(endereco: count, valor: atrib1+k))
+                    count += 1
                 }
             }
-            if(command.nodeAt(index: commands)?.value.inst == "CALL") {
-                atrib += 1
-                _stackCodeLines.push(stackValues(endereco: count, valor: atrib))
-                let optionalString: String? = command.nodeAt(index: commands)?.value.getAtrib1()
-                if let string = optionalString, let myInt = Int(string) {
-                    atrib = myInt
+            if(comando.inst == "DALLOC") {
+                count -= 1
+                let v = command.nodeAt(index: commands)?.value ?? codeLine.defaultValue
+                
+                let atrib1 = Int(v.atrib1) ?? 0
+                let atrib2 = Int(v.atrib2) ?? 0
+                
+                for k in stride(from: atrib2 - 1, to: 0, by: -1){
+                    _stackCodeLines.push(stackValues(endereco: atrib1 + k, valor: _stackCodeLines.itemAtPosition(count).valor))
+                    count -= 1
                 }
+            }
+            if(comando.inst == "CALL") {
+                count += 1
+                _stackCodeLines.inserAtPosition(count, stackValues(endereco: count, valor: commands+1))
+                
+                commands = Int(comando.atrib1) ?? 0
                 
 
             }
-            if(command.nodeAt(index: commands)?.value.inst == "RETURN") {
-                let optionalString: String? = command.nodeAt(index: commands)?.value.getAtrib1()
-                if let string = optionalString, let myInt = Int(string) {
-                    atrib += myInt
-                }
-
-                _stackCodeLines.pop()
+            if(comando.inst == "RETURN") {
+                
+                commands = _stackCodeLines.itemAtPosition(count).valor
+                count-=1
+                
             }
-
+            commands+=1
             
             
-        }
+            for i in 0..<_stackCodeLines.items.count{
+                //stackUI[i][0] "endereco": "\(items.endereco)", "valor": "\(items.valor)"
+                //print(stackUI[i]["linha"])
+                
+                stackUI[i]["linha"] = stackUI[i]["linha"]
+                stackUI[i]["endereco"] = "\(_stackCodeLines.itemAtPosition(i+1).endereco)"
+                stackUI[i]["valor"] = "\(_stackCodeLines.itemAtPosition(i+1).valor)"
+                
+                
+            }
+            
+            stackUI[comando.linha+1]["focus"] = "true"
+            
+            
+            let str = readLine() ?? "0"
+            stackAddr()
         
+        }
+        //stackAddr.reloadData()
+
     }
     
     
