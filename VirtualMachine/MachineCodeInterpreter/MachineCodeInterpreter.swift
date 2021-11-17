@@ -470,15 +470,11 @@ class MachineCodeInterpreter {
             }
             else
             if(command.nodeAt(index: commands)?.value.inst == "STR") {
-                var end = command.nodeAt(index: commands)?.value.getAtrib1()
-                let optionalString: String? = command.nodeAt(index: commands)?.value.getAtrib1()
-                if let string = optionalString, let myInt = Int(string) {
-                    print("Int : \(myInt)")
-                    var response = _stackCodeLines.itemAtPosition(myInt)
-                    response.valor = _stackCodeLines.peek()?.valor ?? 0
+                if let end = Int((command.nodeAt(index: commands)?.value.getAtrib1() ?? "")) {
+                    let aux = _stackCodeLines.itemAtPosition(_stackCodeLines.items.count - 1)
+                    _stackCodeLines.items[end].valor = aux.valor
+                    commands -= 1
                 }
-                commands += 1
-
             }
             else
             if(command.nodeAt(index: commands)?.value.inst == "JMP") {

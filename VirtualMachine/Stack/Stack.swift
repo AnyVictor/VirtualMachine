@@ -34,11 +34,7 @@ struct Stack<Element> {
            items.append(element)
     }
     
-    mutating func itemAtPosition(_ index: Int) -> Element{
-        
+    mutating func itemAtPosition(_ index: Int) -> Element {
         return items[index]
     }
-
-
-
 }
