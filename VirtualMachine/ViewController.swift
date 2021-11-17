@@ -67,6 +67,8 @@ class ViewController: NSViewController {
         super.viewDidLoad()
         mainTableView.delegate = self
         mainTableView.dataSource = self
+        stackAddr.delegate = self
+        stackAddr.dataSource = self
 
         // reload tableview
         //stackAddr.reloadData()
@@ -118,26 +120,46 @@ class ViewController: NSViewController {
 //MARK: - Table View
 extension ViewController: NSTableViewDelegate, NSTableViewDataSource {
     func numberOfRows(in tableView: NSTableView) -> Int {
-        return nomes.count
+        if tableView.identifier == NSUserInterfaceItemIdentifier(rawValue: "mainTableView") {
+            return nomes.count
+        } else {
+            return 2
+        }
     }
 
     func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
 
-        if tableColumn?.identifier == NSUserInterfaceItemIdentifier(rawValue: "linha") {
-            let cellIdentifier = NSUserInterfaceItemIdentifier(rawValue: "celulaLinha")
-            guard let cellView = tableView.makeView(withIdentifier: cellIdentifier, owner: self) as? NSTableCellView else { return nil }
-            cellView.textField?.integerValue = row
-            return cellView
-        } else if tableColumn?.identifier == NSUserInterfaceItemIdentifier(rawValue: "atributo1") {
-            let cellIdentifier = NSUserInterfaceItemIdentifier(rawValue: "celulaAtributo1")
-            guard let cellView = tableView.makeView(withIdentifier: cellIdentifier, owner: self) as? NSTableCellView else { return nil }
-            cellView.textField?.stringValue = nomes[row]
-            return cellView
-        } else if tableColumn?.identifier == NSUserInterfaceItemIdentifier(rawValue: "atributo2"){
-            let cellIdentifier = NSUserInterfaceItemIdentifier(rawValue: "celulaAtributo2")
-            guard let cellView = tableView.makeView(withIdentifier: cellIdentifier, owner: self) as? NSTableCellView else { return nil }
-            cellView.textField?.stringValue = idade[row]
-            return cellView
+        if tableView.identifier == NSUserInterfaceItemIdentifier(rawValue: "mainTableView") {
+            if tableColumn?.identifier == NSUserInterfaceItemIdentifier(rawValue: "linha") {
+                let cellIdentifier = NSUserInterfaceItemIdentifier(rawValue: "celulaLinha")
+                guard let cellView = tableView.makeView(withIdentifier: cellIdentifier, owner: self) as? NSTableCellView else { return nil }
+                cellView.textField?.integerValue = row
+                return cellView
+            } else if tableColumn?.identifier == NSUserInterfaceItemIdentifier(rawValue: "atributo1") {
+                let cellIdentifier = NSUserInterfaceItemIdentifier(rawValue: "celulaAtributo1")
+                guard let cellView = tableView.makeView(withIdentifier: cellIdentifier, owner: self) as? NSTableCellView else { return nil }
+                cellView.textField?.stringValue = nomes[row]
+                return cellView
+            } else if tableColumn?.identifier == NSUserInterfaceItemIdentifier(rawValue: "atributo2"){
+                let cellIdentifier = NSUserInterfaceItemIdentifier(rawValue: "celulaAtributo2")
+                guard let cellView = tableView.makeView(withIdentifier: cellIdentifier, owner: self) as? NSTableCellView else { return nil }
+                cellView.textField?.stringValue = idade[row]
+                return cellView
+            }
+        }
+
+        if tableView.identifier == NSUserInterfaceItemIdentifier(rawValue: "stackAddr") {
+            if tableColumn?.identifier == NSUserInterfaceItemIdentifier(rawValue: "endereco") {
+                let cellIdentifier = NSUserInterfaceItemIdentifier(rawValue: "celulaEndereco")
+                guard let cellView = tableView.makeView(withIdentifier: cellIdentifier, owner: self) as? NSTableCellView else { return nil }
+                cellView.textField?.integerValue = row
+                return cellView
+            } else if tableColumn?.identifier == NSUserInterfaceItemIdentifier(rawValue: "valor") {
+                let cellIdentifier = NSUserInterfaceItemIdentifier(rawValue: "celulaValor")
+                guard let cellView = tableView.makeView(withIdentifier: cellIdentifier, owner: self) as? NSTableCellView else { return nil }
+                cellView.textField?.stringValue = nomes[row]
+                return cellView
+            }
         }
         return nil
     }
