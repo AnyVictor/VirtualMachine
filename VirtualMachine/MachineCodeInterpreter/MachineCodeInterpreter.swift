@@ -32,6 +32,8 @@ class MachineCodeInterpreter  {
     var _stackCodeLines = Stack<stackValues>()
     var lineCounter : Int
     var rotuleToReplace: [[Int]] = []
+    var commands: Int = 0
+    var count : Int = 1
     /*var stackUI :  [[String: String]] = [["endereco":"2", "valor":"12"]]
     var stackAddr: NSTableView*/
     
@@ -44,11 +46,11 @@ class MachineCodeInterpreter  {
     }
  
     
-    func analyser(stackUI : inout [[String: String]], stackAddr: () -> Void) {
+    func analyser(stackUI : inout [[String: String]]) {
         self.extractCommands(stackUI: &stackUI)
         
-        stackAddr()
-        self.executaNormal(command: linkedCodeLines, stackUI: &stackUI, stackAddr: stackAddr )
+        //stackAddr()
+        //self.executaNormal(command: linkedCodeLines, stackUI: &stackUI )
     }
     
     
@@ -111,7 +113,7 @@ class MachineCodeInterpreter  {
             
             if(i == 0 && item.isNumber){
                 rotule = item.wholeNumberValue ?? -1
-            }else{
+            }else if(item != "\t"){
                 if(item != " "){
                     
                     if(crtlCommand == 0){
@@ -180,12 +182,11 @@ class MachineCodeInterpreter  {
         
     }
     
-    func executaNormal(command: LinkedList<codeLine>, stackUI : inout [[String: String]], stackAddr: () -> Void) {
+    func executaNormal(stackUI : inout [[String: String]], dataOutput: inout NSTextView) -> Bool {
+        let command = self.linkedCodeLines
         
         
-        var commands = -1
-        var count = -1
-        while(true){
+        //while(true){
             
             let comando = command.nodeAt(index: commands)?.value ?? codeLine.defaultValue
             
@@ -379,11 +380,19 @@ class MachineCodeInterpreter  {
             if(comando.inst == "START") {
                 
                 count -= 1
+                commands = 1
+                return true
+                
             }
             else
             if(comando.inst == "HLT") {
+                if(comando.linha != -1){
+                    stackUI[comando.linha]["focus"] = "true"
+                }
                 print("ACABOOOOOU")
-                break
+                return false
+                
+                //break
             }
             else
             if(comando.inst == "STR") {
@@ -428,7 +437,8 @@ class MachineCodeInterpreter  {
             if(comando.inst == "PRN") {
                 let content = _stackCodeLines.itemAtPosition(count).valor
                 count -= 1
-                print("Saida: \(content)")
+                //print("Saida: \(content)")
+                dataOutput.string += "Saída: \(content) \n"
                 
             }
             else
@@ -470,6 +480,7 @@ class MachineCodeInterpreter  {
                 count-=1
                 
             }
+        
             commands+=1
             
             
@@ -480,19 +491,19 @@ class MachineCodeInterpreter  {
                 stackUI[i]["linha"] = stackUI[i]["linha"]
                 stackUI[i]["endereco"] = "\(_stackCodeLines.itemAtPosition(i+1).endereco)"
                 stackUI[i]["valor"] = "\(_stackCodeLines.itemAtPosition(i+1).valor)"
-                
+                stackUI[i]["focus"] = "false"
                 
             }
-            
-//            stackUI[comando.linha+1]["focus"] = "true"
-            
+            if(comando.linha != -1){
+                stackUI[comando.linha]["focus"] = "true"
+            }
             
 //            let str = readLine() ?? "0"
-            stackAddr()
+            //stackAddr()
         
-        }
+        //}
         //stackAddr.reloadData()
-
+        return true
     }
     
     

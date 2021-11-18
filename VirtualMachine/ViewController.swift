@@ -39,12 +39,76 @@ class ViewController: NSViewController {
     @IBOutlet weak var passoRadioButton: NSButton!
     @IBOutlet weak var stackAddr : NSTableView!
     @IBOutlet weak var mainTableView: NSTableView!
-
+    
+    @IBOutlet var dataOutput: NSTextView!
+    
+    var _isRadioButtonSelected: Bool = false
+    
     let nomes = ["Carlos","Joao","Manuel"]
     let idade = ["32","22","13"]
 
-
+    var VirtualMachine: MachineCodeInterpreter?
     var data: [[String: String]] = [["endereco":"1", "valor":"1"]]
+    
+    
+    @IBAction func executeCodeButton(_ sender: Any) {
+        
+        //dataOutput.string = "zuinho"
+        
+        if(_isRadioButtonSelected){
+            VirtualMachine?.executaNormal(stackUI: &self.data, dataOutput : &self.dataOutput)
+        }
+        else {
+            while(true){
+                if let ctrl = VirtualMachine?.executaNormal(stackUI: &self.data, dataOutput : &self.dataOutput){
+                    if(!ctrl){
+                        break
+                    }
+                }
+                
+            }
+            
+        }
+        mainTableView.reloadData()
+        stackAddr.reloadData()
+        
+       
+        
+    }
+    
+    @IBAction func stopButtonAction(_ sender: Any) {
+        
+        let filepath = FileManager.default.urls(for: .desktopDirectory, in: .userDomainMask)[0].appendingPathComponent("output.txt")
+        
+        var contents : String
+        do{
+            self.data = [["endereco":"1", "valor":"1"]]
+
+         contents = try String(contentsOf: filepath)
+        self.VirtualMachine = nil
+        self.VirtualMachine = MachineCodeInterpreter(fileContent: contents)
+
+        self.VirtualMachine?.analyser(stackUI: &self.data)
+        }catch{
+            print(error)
+        }
+        mainTableView.reloadData()
+        stackAddr.reloadData()
+        
+    }
+    @IBAction func radioButtonChanged(_ sender: NSButton) {
+        print(sender.identifier?.rawValue)
+        
+        if(sender.identifier?.rawValue == "passoRadioButton"){
+            self._isRadioButtonSelected = true
+        }else{
+            self._isRadioButtonSelected = false
+        }
+        
+    }
+    
+    
+    
 
     override func viewWillAppear() {
         super.viewWillAppear()
@@ -81,30 +145,37 @@ class ViewController: NSViewController {
         //let filepath = Bundle.main.path(forResource: "gera1", ofType: "txt") ?? ""
         let filepath = FileManager.default.urls(for: .desktopDirectory, in: .userDomainMask)[0].appendingPathComponent("output.txt")
         
-//        do {
-//
-//            let contents = try String(contentsOf: filepath)
-//            let queue = DispatchQueue(label: "work-queue")
-//
-//            queue.async{
-//                let VirtualMachine : MachineCodeInterpreter = MachineCodeInterpreter(fileContent: contents)
-//
-//                VirtualMachine.analyser(stackUI: &self.data, stackAddr: self.reloadData )
-//                //self.stackAddr.reloadData()
-//            }
-//            DispatchQueue.main.async {
-//                //self.view.backgroundC
-//
-//            }
-//
-//
-//
-//            //print(contents)
-//            //  Now push second ViewController form here with contents.
-//        } catch {
-//            print("erro", error)
-//            // contents could not be loaded
-//        }
+        var contents : String
+        do{
+         contents = try String(contentsOf: filepath)
+        self.VirtualMachine = MachineCodeInterpreter(fileContent: contents)
+
+        self.VirtualMachine?.analyser(stackUI: &self.data)
+        }catch{
+            print(error)
+        }
+        let queue = DispatchQueue(label: "work-queue")
+
+        //queue.async{
+        
+            //self.stackAddr.reloadData()
+        //}
+        /*do {
+
+           
+            DispatchQueue.main.async {
+                //self.view.backgroundC
+
+            }
+
+
+
+            //print(contents)
+           //  Now push second ViewController form here with contents.
+            } catch {
+            print("erro", error)
+           // contents could not be loaded
+        }*/
     }
 
     override var representedObject: Any? {
@@ -113,51 +184,75 @@ class ViewController: NSViewController {
         }
     }
 
-    @IBAction func radioButtonChanged(_ sender: AnyObject) {
-    }
+    
 }
 
 //MARK: - Table View
 extension ViewController: NSTableViewDelegate, NSTableViewDataSource {
     func numberOfRows(in tableView: NSTableView) -> Int {
         if tableView.identifier == NSUserInterfaceItemIdentifier(rawValue: "mainTableView") {
-            return nomes.count
+            return data.count
         } else {
             return 2
         }
     }
-
+    
     func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
 
         if tableView.identifier == NSUserInterfaceItemIdentifier(rawValue: "mainTableView") {
+            
+            if( data[row]["focus"] == "true"){
+                tableView.selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false)
+                tableView.scrollRowToVisible(row)
+                
+            }
+            
             if tableColumn?.identifier == NSUserInterfaceItemIdentifier(rawValue: "linha") {
                 let cellIdentifier = NSUserInterfaceItemIdentifier(rawValue: "celulaLinha")
                 guard let cellView = tableView.makeView(withIdentifier: cellIdentifier, owner: self) as? NSTableCellView else { return nil }
-                cellView.textField?.integerValue = row
+                cellView.textField?.stringValue = data[row]["linha"] ?? ""
+                
                 return cellView
-            } else if tableColumn?.identifier == NSUserInterfaceItemIdentifier(rawValue: "atributo1") {
+            }else if tableColumn?.identifier == NSUserInterfaceItemIdentifier(rawValue: "instrucao"){
+                let cellIdentifier = NSUserInterfaceItemIdentifier(rawValue: "celulaInstrucao")
+                guard let cellView = tableView.makeView(withIdentifier: cellIdentifier, owner: self) as? NSTableCellView else { return nil }
+                cellView.textField?.stringValue = data[row]["instrucao"] ?? ""
+                
+                return cellView
+            }else if tableColumn?.identifier == NSUserInterfaceItemIdentifier(rawValue: "atributo1") {
                 let cellIdentifier = NSUserInterfaceItemIdentifier(rawValue: "celulaAtributo1")
                 guard let cellView = tableView.makeView(withIdentifier: cellIdentifier, owner: self) as? NSTableCellView else { return nil }
-                cellView.textField?.stringValue = nomes[row]
+                cellView.textField?.stringValue = data[row]["atributo1"] ?? ""
+                
                 return cellView
             } else if tableColumn?.identifier == NSUserInterfaceItemIdentifier(rawValue: "atributo2"){
                 let cellIdentifier = NSUserInterfaceItemIdentifier(rawValue: "celulaAtributo2")
                 guard let cellView = tableView.makeView(withIdentifier: cellIdentifier, owner: self) as? NSTableCellView else { return nil }
-                cellView.textField?.stringValue = idade[row]
+                cellView.textField?.stringValue = data[row]["atributo2"] ?? ""
+                
                 return cellView
             }
+            else if tableColumn?.identifier == NSUserInterfaceItemIdentifier(rawValue: "comentario"){
+                let cellIdentifier = NSUserInterfaceItemIdentifier(rawValue: "celulaComentario")
+                guard let cellView = tableView.makeView(withIdentifier: cellIdentifier, owner: self) as? NSTableCellView else { return nil }
+                cellView.textField?.stringValue = data[row]["comentario"] ?? ""
+                return cellView
+            }
+            
+            
+           
         }
 
         if tableView.identifier == NSUserInterfaceItemIdentifier(rawValue: "stackAddr") {
             if tableColumn?.identifier == NSUserInterfaceItemIdentifier(rawValue: "endereco") {
                 let cellIdentifier = NSUserInterfaceItemIdentifier(rawValue: "celulaEndereco")
                 guard let cellView = tableView.makeView(withIdentifier: cellIdentifier, owner: self) as? NSTableCellView else { return nil }
-                cellView.textField?.integerValue = row
+                cellView.textField?.stringValue = data[row]["endereco"] ?? ""
                 return cellView
             } else if tableColumn?.identifier == NSUserInterfaceItemIdentifier(rawValue: "valor") {
                 let cellIdentifier = NSUserInterfaceItemIdentifier(rawValue: "celulaValor")
                 guard let cellView = tableView.makeView(withIdentifier: cellIdentifier, owner: self) as? NSTableCellView else { return nil }
-                cellView.textField?.stringValue = nomes[row]
+                cellView.textField?.stringValue = data[row]["valor"] ?? ""
                 return cellView
             }
         }
