@@ -48,8 +48,8 @@ class ViewController: NSViewController {
     let idade = ["32","22","13"]
 
     var VirtualMachine: MachineCodeInterpreter?
-    var data: [[String: String]] = [["endereco":"1", "valor":"1"]]
-    var dataStack : [[String: String]] = [["endereco":"1", "valor":"1"]]
+    var data: [[String: String]] = [[:]]
+    var dataStack : [[String: String]] = [[:]]
     
     @IBAction func executeCodeButton(_ sender: Any) {
         
@@ -60,8 +60,9 @@ class ViewController: NSViewController {
         }
         else {
             while(true){
-                if let ctrl = VirtualMachine?.executaNormal(stackUI: &self.data, dataOutput : &self.dataOutput){
+                if let ctrl = VirtualMachine?.executaNormal(dataCommandsUI: &self.data, dataStackUI: &self.dataStack, dataOutput : &self.dataOutput){
                     if(!ctrl){
+                        self.cleanVirtualMachine()
                         break
                     }
                 }
@@ -76,24 +77,10 @@ class ViewController: NSViewController {
         
     }
     
+    
     @IBAction func stopButtonAction(_ sender: Any) {
+        self.cleanVirtualMachine()
         
-        let filepath = FileManager.default.urls(for: .desktopDirectory, in: .userDomainMask)[0].appendingPathComponent("output.txt")
-        
-        var contents : String
-        do{
-            self.data = [["endereco":"1", "valor":"1"]]
-
-         contents = try String(contentsOf: filepath)
-        self.VirtualMachine = nil
-        self.VirtualMachine = MachineCodeInterpreter(fileContent: contents)
-
-        self.VirtualMachine?.analyser(stackUI: &self.data)
-        }catch{
-            print(error)
-        }
-        mainTableView.reloadData()
-        stackAddr.reloadData()
         
     }
     @IBAction func radioButtonChanged(_ sender: NSButton) {
@@ -179,6 +166,25 @@ class ViewController: NSViewController {
            // contents could not be loaded
         }*/
     }
+    
+    func cleanVirtualMachine(){
+        let filepath = FileManager.default.urls(for: .desktopDirectory, in: .userDomainMask)[0].appendingPathComponent("output.txt")
+        
+        var contents : String
+        do{
+            self.data = [["endereco":"1", "valor":"1"]]
+
+         contents = try String(contentsOf: filepath)
+        self.VirtualMachine = nil
+        self.VirtualMachine = MachineCodeInterpreter(fileContent: contents)
+
+        self.VirtualMachine?.analyser(stackUI: &self.data)
+        }catch{
+            print(error)
+        }
+        mainTableView.reloadData()
+        stackAddr.reloadData()
+    }
 
     override var representedObject: Any? {
         didSet {
@@ -250,12 +256,12 @@ extension ViewController: NSTableViewDelegate, NSTableViewDataSource {
             if tableColumn?.identifier == NSUserInterfaceItemIdentifier(rawValue: "endereco") {
                 let cellIdentifier = NSUserInterfaceItemIdentifier(rawValue: "celulaEndereco")
                 guard let cellView = tableView.makeView(withIdentifier: cellIdentifier, owner: self) as? NSTableCellView else { return nil }
-                cellView.textField?.stringValue = data[row]["endereco"] ?? ""
+                cellView.textField?.stringValue = dataStack[row]["endereco"] ?? ""
                 return cellView
             } else if tableColumn?.identifier == NSUserInterfaceItemIdentifier(rawValue: "valor") {
                 let cellIdentifier = NSUserInterfaceItemIdentifier(rawValue: "celulaValor")
                 guard let cellView = tableView.makeView(withIdentifier: cellIdentifier, owner: self) as? NSTableCellView else { return nil }
-                cellView.textField?.stringValue = data[row]["valor"] ?? ""
+                cellView.textField?.stringValue = dataStack[row]["valor"] ?? ""
                 return cellView
             }
         }

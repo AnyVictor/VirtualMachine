@@ -182,7 +182,7 @@ class MachineCodeInterpreter  {
     }
     
 
-    func executaNormal(dataCommandsUI : inout [[String: String]], dataStackUI: inout Int, dataOutput: inout NSTextView) -> Bool {
+    func executaNormal(dataCommandsUI : inout [[String: String]], dataStackUI: inout [[String: String]], dataOutput: inout NSTextView) -> Bool {
 
             let command = self.linkedCodeLines
             
@@ -351,11 +351,12 @@ class MachineCodeInterpreter  {
                 var _stackCodeLines = Stack<stackValues>()
                 i += 1
             } else if (instruction == "HLT") {
-                print("ACABOOOOOU!")
+                //print("ACABOOOOOU!")
                 if(instValue.linha != -1) {
-                    dataCommandsUI[instValue.linha]["focues"] = "true"
+                    dataCommandsUI[instValue.linha]["focus"] = "true"
                 }
                 i += 1
+                dataOutput.string += "Fim ;)\n"
                 return false
             } else if (instruction == "STR") {
 
@@ -398,7 +399,8 @@ class MachineCodeInterpreter  {
                 i += 1
             } else if (instruction == "PRN") {
                 print("Saida: ", (_stackCodeLines.peek()?.valor ?? ""))
-                dataOutput.string += "Saída: \((_stackCodeLines.peek()?.valor))\n"
+                let print = _stackCodeLines.peek()?.valor ?? -1
+                dataOutput.string += "Saída: \(print)\n"
                 _stackCodeLines.pop()
                 i += 1
             } else if (instruction == "ALLOC") {
@@ -447,20 +449,27 @@ class MachineCodeInterpreter  {
                 _stackCodeLines.pop()
             }
         
-            dataStackUI = 0
-
+        dataStackUI.removeAll()
             for i in 0..<_stackCodeLines.items.count{
                 //stackUI[i][0] "endereco": "\(items.endereco)", "valor": "\(items.valor)"
                 //print(stackUI[i]["linha"])
 
-                dataCommandsUI[i]["linha"] = dataCommandsUI[i]["linha"]
-                dataCommandsUI[i]["endereco"] = "\(_stackCodeLines.itemAtPosition(i).endereco)"
-                dataCommandsUI[i]["valor"] = "\(_stackCodeLines.itemAtPosition(i).valor)"
-                dataCommandsUI[i]["focus"] = "false"
-                dataStackUI+=1
+                //dataCommandsUI[i]["linha"] = dataCommandsUI[i]["linha"]
+               
+                dataStackUI.append([ "endereco": "\(_stackCodeLines.itemAtPosition(i).endereco)", "valor": "\(_stackCodeLines.itemAtPosition(i).valor)", "focus": "false"])
+                
+                //dataStackUI+=1
             }
             if(instValue.linha != -1){
-                dataCommandsUI[instValue.linha]["focus"] = "true"
+                for i in 0..<dataCommandsUI.count{
+                    
+                    if(i == instValue.linha){
+                        dataCommandsUI[instValue.linha]["focus"] = "true"
+                    }else{
+                        dataCommandsUI[i]["focus"] = "false"
+                    }
+                    
+                }
             }
 
             return true
