@@ -36,12 +36,12 @@ struct Stack<Element> {
     
     mutating func itemAtPosition(_ index: Int) -> Element{
         
-        return items[index-1]
+        return items[index]
     }
     
     mutating func inserAtPosition(_ index: Int, _ value: Element){
         
-        items[index-1] = value
+        items[index] = value
     }
     
     mutating func initStack(_ value:Int){

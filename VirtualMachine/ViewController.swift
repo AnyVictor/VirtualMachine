@@ -49,14 +49,14 @@ class ViewController: NSViewController {
 
     var VirtualMachine: MachineCodeInterpreter?
     var data: [[String: String]] = [["endereco":"1", "valor":"1"]]
-    
+    var dataStack : [[String: String]] = [["endereco":"1", "valor":"1"]]
     
     @IBAction func executeCodeButton(_ sender: Any) {
         
         //dataOutput.string = "zuinho"
         
         if(_isRadioButtonSelected){
-            VirtualMachine?.executaNormal(stackUI: &self.data, dataOutput : &self.dataOutput)
+            VirtualMachine?.executaNormal(dataCommandsUI: &self.data, dataStackUI: &self.dataStack, dataOutput : &self.dataOutput)
         }
         else {
             while(true){
@@ -195,7 +195,8 @@ extension ViewController: NSTableViewDelegate, NSTableViewDataSource {
         if tableView.identifier == NSUserInterfaceItemIdentifier(rawValue: "mainTableView") {
             return data.count
         } else {
-            return 2
+            
+            return dataStack.count
         }
     }
     
