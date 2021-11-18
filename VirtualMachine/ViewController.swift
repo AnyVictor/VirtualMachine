@@ -140,6 +140,8 @@ class ViewController: NSViewController {
 
         //self.stackAddr.endUpdates()
         // Set the radio group's initial selection
+       
+        
         normalRadioButton.state = NSControl.StateValue.on
 
         //let filepath = Bundle.main.path(forResource: "gera1", ofType: "txt") ?? ""

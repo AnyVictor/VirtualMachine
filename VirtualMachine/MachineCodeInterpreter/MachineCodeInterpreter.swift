@@ -427,9 +427,16 @@ class MachineCodeInterpreter  {
             else
             if(comando.inst == "RD") {
                 count += 1
-                let str = readLine() ?? "0"
+                //let str = readLine() ?? "0"
+                
+                let alert = NSAlert()
+                alert.messageText = "Digite uma Entrada"
+                let textfield = NSTextField(frame: NSRect(x: 0.0, y: 0.0, width: 80.0, height: 24.0))
+                textfield.alignment = .center
+                alert.accessoryView = textfield
+                alert.runModal()
 
-                _stackCodeLines.inserAtPosition(count, stackValues(endereco: count, valor: Int(str) ?? 0))
+                _stackCodeLines.inserAtPosition(count, stackValues(endereco: count, valor: Int(textfield.stringValue) ?? 0))
 
                 
             }
