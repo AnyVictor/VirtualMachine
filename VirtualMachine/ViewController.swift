@@ -39,7 +39,7 @@ class ViewController: NSViewController {
     @IBOutlet weak var passoRadioButton: NSButton!
     @IBOutlet weak var stackAddr : NSTableView!
     @IBOutlet weak var mainTableView: NSTableView!
-    
+    @IBOutlet weak var documentNameInput: NSTextField!
     @IBOutlet var dataOutput: NSTextView!
     
     var _isRadioButtonSelected: Bool = false
@@ -51,6 +51,21 @@ class ViewController: NSViewController {
     var data: [[String: String]] = [[:]]
     var dataStack : [[String: String]] = [[:]]
     
+    @IBAction func documentTextFieldAction(_ sender: NSTextField) {
+        let filepath = FileManager.default.urls(for: .desktopDirectory, in: .userDomainMask)[0].appendingPathComponent(documentNameInput.stringValue)
+        var contents : String
+        do{
+         contents = try String(contentsOf: filepath)
+        self.VirtualMachine = MachineCodeInterpreter(fileContent: contents)
+
+        self.VirtualMachine?.analyser(stackUI: &self.data)
+        }catch{
+            print(error)
+        }
+        let queue = DispatchQueue(label: "work-queue")
+        mainTableView.reloadData()
+        stackAddr.reloadData()
+    }
     @IBAction func executeCodeButton(_ sender: Any) {
         
         //dataOutput.string = "zuinho"
@@ -72,9 +87,6 @@ class ViewController: NSViewController {
         }
         mainTableView.reloadData()
         stackAddr.reloadData()
-        
-       
-        
     }
     
     
@@ -132,18 +144,6 @@ class ViewController: NSViewController {
         normalRadioButton.state = NSControl.StateValue.on
 
         //let filepath = Bundle.main.path(forResource: "gera1", ofType: "txt") ?? ""
-        let filepath = FileManager.default.urls(for: .desktopDirectory, in: .userDomainMask)[0].appendingPathComponent("output.txt")
-        
-        var contents : String
-        do{
-         contents = try String(contentsOf: filepath)
-        self.VirtualMachine = MachineCodeInterpreter(fileContent: contents)
-
-        self.VirtualMachine?.analyser(stackUI: &self.data)
-        }catch{
-            print(error)
-        }
-        let queue = DispatchQueue(label: "work-queue")
 
         //queue.async{
         
@@ -168,8 +168,7 @@ class ViewController: NSViewController {
     }
     
     func cleanVirtualMachine(){
-        let filepath = FileManager.default.urls(for: .desktopDirectory, in: .userDomainMask)[0].appendingPathComponent("output.txt")
-        
+        let filepath = FileManager.default.urls(for: .desktopDirectory, in: .userDomainMask)[0].appendingPathComponent(documentNameInput.stringValue)
         var contents : String
         do{
             self.data = [["endereco":"1", "valor":"1"]]
