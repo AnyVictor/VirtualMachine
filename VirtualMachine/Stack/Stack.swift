@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Metal
 
 
 struct Stack<Element> {
