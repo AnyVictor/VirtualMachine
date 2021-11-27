@@ -107,7 +107,7 @@ class ViewController: NSViewController {
 
     func importQueue() {
         //self.cleanVirtualMachine()
-
+        dataOutput.string = ""
         if(data.count != 0){
             data.removeAll()
             data = [["endereco":"1", "valor":"1"]]
