@@ -41,6 +41,7 @@ class MachineCodeInterpreter  {
         self.fileContent = fileContent
         self.linkedCodeLines = LinkedList<codeLine>()
         self.lineCounter = 0
+        _stackCodeLines.items = [stackValues](repeating: stackValues.defaultValue, count: 500)
       
         //stackAddr.reloadData()
     }

@@ -780,11 +780,11 @@
                                                     <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                     <prototypeCellViews>
                                                         <tableCellView identifier="celulaInstrucao" id="Nlk-ux-yRp">
-                                                            <rect key="frame" x="79" y="0.0" width="75" height="24"/>
+                                                            <rect key="frame" x="79" y="0.0" width="76" height="24"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
                                                                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="DkW-Ff-Ci2">
-                                                                    <rect key="frame" x="0.0" y="4" width="75" height="16"/>
+                                                                    <rect key="frame" x="0.0" y="4" width="76" height="16"/>
                                                                     <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="d5R-Kt-Ixv">
                                                                         <font key="font" usesAppearanceFont="YES"/>
                                                                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
@@ -816,7 +816,7 @@
                                                     <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                     <prototypeCellViews>
                                                         <tableCellView identifier="celulaAtributo1" id="Wo2-ku-0g5">
-                                                            <rect key="frame" x="171" y="0.0" width="77" height="17"/>
+                                                            <rect key="frame" x="172" y="0.0" width="77" height="17"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
                                                                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="dbx-AJ-CaD">
@@ -852,7 +852,7 @@
                                                     <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                     <prototypeCellViews>
                                                         <tableCellView identifier="celulaAtributo2" id="712-aL-Kyq">
-                                                            <rect key="frame" x="265" y="0.0" width="77" height="17"/>
+                                                            <rect key="frame" x="266" y="0.0" width="77" height="17"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
                                                                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="ADq-B5-LkO">
@@ -888,7 +888,7 @@
                                                     <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                     <prototypeCellViews>
                                                         <tableCellView identifier="celulaComentario" id="48d-Qc-a46">
-                                                            <rect key="frame" x="359" y="0.0" width="222" height="17"/>
+                                                            <rect key="frame" x="360" y="0.0" width="222" height="17"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
                                                                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="dpM-LZ-N8Z">
