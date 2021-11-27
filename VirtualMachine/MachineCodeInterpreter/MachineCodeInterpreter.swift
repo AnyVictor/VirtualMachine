@@ -7,7 +7,7 @@ import Cocoa
 
 
 struct codeLine  {
-    static var defaultValue:  codeLine = codeLine(linha: -1, inst: "", atrib1: "", atrib2: "", com: "")
+    static var defaultValue:  codeLine = codeLine(linha: -1 , inst: "", atrib1: "", atrib2: "", com: "")
     var linha: Int
     var inst: String
     var atrib1: String
@@ -34,6 +34,9 @@ class MachineCodeInterpreter  {
     var rotuleToReplace: [[Int]] = []
     var i:Int = 0
     var atrib:Int = 0
+    var s:Int = 0
+    var lastS: Int = 0
+
     /*var stackUI :  [[String: String]] = [["endereco":"2", "valor":"12"]]
     var stackAddr: NSTableView*/
     
@@ -192,165 +195,178 @@ class MachineCodeInterpreter  {
             var instValue = command.nodeAt(index: i)?.value ?? codeLine.defaultValue
 
             if (instruction == "LDC") {
+                self.s += 1
                 let value = instValue
-                _stackCodeLines.push(stackValues(endereco: _stackCodeLines.items.count, valor: Int(value.atrib1) ?? -1))
+                //_stackCodeLines.push(stackValues(endereco: _stackCodeLines.items.count, valor: Int(value.atrib1) ?? -1))
+                _stackCodeLines.inserAtPosition(s, stackValues(endereco: s, valor: Int(value.atrib1) ?? -1))
                 i += 1
+                
             } else if (instruction == "NULL") {
                 i += 1
             } else if (instruction == "LDV") {
-
+                self.s += 1
                 let value = instValue
 
-                let aux = _stackCodeLines.itemAtPosition(Int(value.atrib1) ?? 0)
-                _stackCodeLines.push(stackValues(endereco: _stackCodeLines.items.count, valor: aux.valor))
+                let aux = _stackCodeLines.itemAtPosition(Int(value.atrib1) ?? 0 )
+                //_stackCodeLines.push(stackValues(endereco: _stackCodeLines.items.count, valor: aux.valor))
+                _stackCodeLines.inserAtPosition(s, stackValues(endereco: s, valor: aux.valor))
                 i += 1
+                
             } else if (instruction == "ADD") {
-                let add = (_stackCodeLines.itemAtPosition(_stackCodeLines.items.count - 2).valor) + (_stackCodeLines.itemAtPosition(_stackCodeLines.items.count - 1).valor)
-                _stackCodeLines.items[_stackCodeLines.items.count - 2].valor = add
-                _stackCodeLines.pop()
+                let add = (_stackCodeLines.itemAtPosition(s - 1).valor) + (_stackCodeLines.itemAtPosition(s).valor)
+                _stackCodeLines.items[s - 1].valor = add
+                
+                //_stackCodeLines.inserAtPosition(s-1, add)
+                
+                //_stackCodeLines.pop()
                 i += 1
+                s -= 1
             } else if (instruction == "SUB") {
-                let sub = (_stackCodeLines.items[_stackCodeLines.items.count - 2].valor) - (_stackCodeLines.items[_stackCodeLines.items.count - 1].valor)
-                _stackCodeLines.items[_stackCodeLines.items.count - 2].valor = sub
-                _stackCodeLines.pop()
+                let sub = (_stackCodeLines.items[s - 1].valor) - (_stackCodeLines.items[s].valor)
+                _stackCodeLines.items[s - 1].valor = sub
+                //_stackCodeLines.pop()
                 i += 1
-
+                self.s -= 1
             } else if (instruction == "MULT") {
-                let mult = (_stackCodeLines.items[_stackCodeLines.items.count - 2].valor) * (_stackCodeLines.items[_stackCodeLines.items.count - 1].valor)
-                _stackCodeLines.items[_stackCodeLines.items.count - 2].valor = mult
-                _stackCodeLines.pop()
+                let mult = (_stackCodeLines.items[s - 1].valor) * (_stackCodeLines.items[s].valor)
+                _stackCodeLines.items[_stackCodeLines.items.count - 1].valor = mult
+                //_stackCodeLines.pop()
                 i += 1
+                self.s -= 1
 
             } else if (instruction == "DIVI") {
-                let div = (_stackCodeLines.items[_stackCodeLines.items.count - 2].valor) / (_stackCodeLines.items[_stackCodeLines.items.count - 1].valor)
-                _stackCodeLines.items[_stackCodeLines.items.count - 2].valor = div
-                _stackCodeLines.pop()
+                let div = (_stackCodeLines.items[s - 1].valor) / (_stackCodeLines.items[s].valor)
+                _stackCodeLines.items[s - 1].valor = div
+               // _stackCodeLines.pop()
                 i += 1
-
+                self.s -= 1
             } else if (instruction == "INV") {
-                let inv = -(_stackCodeLines.items[_stackCodeLines.items.count - 1].valor);
-                _stackCodeLines.items[_stackCodeLines.items.count - 1].valor = inv
+                let inv = -(_stackCodeLines.items[s].valor);
+                _stackCodeLines.items[s].valor = inv
                 i += 1
 
             } else if (instruction == "AND") {
-                let aux1 = _stackCodeLines.itemAtPosition(_stackCodeLines.items.count - 1 ?? 0)
+                let aux1 = _stackCodeLines.itemAtPosition(s-1)
 
-                let aux2 = _stackCodeLines.itemAtPosition(_stackCodeLines.items.count - 2 ?? 0)
+                let aux2 = _stackCodeLines.itemAtPosition(s)
 
-                if (aux2.valor == 1 ?? 0 && aux1.valor == 1 ?? 0) {
-                    _stackCodeLines.items[_stackCodeLines.items.count - 2].valor = 1
+                if (aux2.valor == 1 && aux1.valor == 1 ) {
+                    _stackCodeLines.items[s-1].valor = 1
                 } else {
-                    _stackCodeLines.items[_stackCodeLines.items.count - 2].valor = 0
+                    _stackCodeLines.items[s-1].valor = 0
                 }
-                _stackCodeLines.pop()
+                //_stackCodeLines.pop()
                 i += 1
+                self.s -= 1
 
             } else if (instruction == "OR") {
-                let aux1 = _stackCodeLines.itemAtPosition(_stackCodeLines.items.count - 1 ?? 0)
+                let aux1 = _stackCodeLines.itemAtPosition(s-1)
 
-                let aux2 = _stackCodeLines.itemAtPosition(_stackCodeLines.items.count - 2 ?? 0)
+                let aux2 = _stackCodeLines.itemAtPosition(s)
 
-                if (aux2.valor == 1 ?? 0 || aux1.valor == 1 ?? 0) {
-                    _stackCodeLines.items[_stackCodeLines.items.count - 2].valor = 1
+                if (aux2.valor == 1 || aux1.valor == 1 ) {
+                    _stackCodeLines.items[s-1].valor = 1
                 } else {
-                    _stackCodeLines.items[_stackCodeLines.items.count - 2].valor = 0
+                    _stackCodeLines.items[s-1].valor = 0
                 }
-                _stackCodeLines.pop()
+                //_stackCodeLines.pop()
                 i += 1
-
+                self.s -= 1
             } else if (instruction == "NEG") {
 
-                let neg = (1 - (_stackCodeLines.items[_stackCodeLines.items.count - 1].valor));
-                _stackCodeLines.items[_stackCodeLines.items.count - 1].valor = neg
+                let neg = (1 - (_stackCodeLines.items[s].valor));
+                _stackCodeLines.items[s].valor = neg
                 i += 1
 
             } else if (instruction == "CME") {
 
-                let aux1 = _stackCodeLines.itemAtPosition(_stackCodeLines.items.count - 1 ?? 0)
+                let aux1 = _stackCodeLines.itemAtPosition(s)
 
-                let aux2 = _stackCodeLines.itemAtPosition(_stackCodeLines.items.count - 2 ?? 0)
+                let aux2 = _stackCodeLines.itemAtPosition(s-1)
 
-                if (aux2.valor ?? 0 < aux1.valor ?? 0) {
-                    _stackCodeLines.items[_stackCodeLines.items.count - 2].valor = 1
+                if (aux2.valor  < aux1.valor ) {
+                    _stackCodeLines.items[s-1].valor = 1
                 } else {
-                    _stackCodeLines.items[_stackCodeLines.items.count - 2].valor = 0
+                    _stackCodeLines.items[s-1].valor = 0
                 }
-                _stackCodeLines.pop()
+                //_stackCodeLines.pop()
                 i += 1
-
+                self.s -= 1
             } else if (instruction == "CMA") {
 
-                let aux1 = _stackCodeLines.itemAtPosition(_stackCodeLines.items.count - 1 ?? 0)
+                let aux1 = _stackCodeLines.itemAtPosition(s)
 
-                let aux2 = _stackCodeLines.itemAtPosition(_stackCodeLines.items.count - 2 ?? 0)
+                let aux2 = _stackCodeLines.itemAtPosition(s-1)
 
-                if (aux2.valor ?? 0 > aux1.valor ?? 0) {
-                    _stackCodeLines.items[_stackCodeLines.items.count - 2].valor = 1
+                if (aux2.valor  > aux1.valor ) {
+                    _stackCodeLines.items[s-1].valor = 1
                 } else {
-                    _stackCodeLines.items[_stackCodeLines.items.count - 2].valor = 0
+                    _stackCodeLines.items[s-1].valor = 0
                 }
-                _stackCodeLines.pop()
+                //_stackCodeLines.pop()
                 i += 1
-
+                self.s -= 1
             } else if (instruction == "CEQ") {
 
-                let aux1 = _stackCodeLines.itemAtPosition(_stackCodeLines.items.count - 1 ?? 0)
+                let aux1 = _stackCodeLines.itemAtPosition(s)
 
-                let aux2 = _stackCodeLines.itemAtPosition(_stackCodeLines.items.count - 2 ?? 0)
+                let aux2 = _stackCodeLines.itemAtPosition(s-1)
 
-                if (aux2.valor ?? 0 == aux1.valor ?? 0) {
-                    _stackCodeLines.items[_stackCodeLines.items.count - 2].valor = 1
+                if (aux2.valor  == aux1.valor ) {
+                    _stackCodeLines.items[s-1].valor = 1
                 } else {
-                    _stackCodeLines.items[_stackCodeLines.items.count - 2].valor = 0
+                    _stackCodeLines.items[s-1].valor = 0
                 }
-                _stackCodeLines.pop()
+               // _stackCodeLines.pop()
                 i += 1
-
+                self.s -= 1
             } else if (instruction == "CDIF") {
 
-                let aux1 = _stackCodeLines.itemAtPosition(_stackCodeLines.items.count - 1 ?? 0)
+                let aux1 = _stackCodeLines.itemAtPosition(s)
 
-                let aux2 = _stackCodeLines.itemAtPosition(_stackCodeLines.items.count - 2 ?? 0)
+                let aux2 = _stackCodeLines.itemAtPosition(s-1)
 
                 if (aux2.valor ?? 0 != aux1.valor ?? 0) {
-                    _stackCodeLines.items[_stackCodeLines.items.count - 2].valor = 1
+                    _stackCodeLines.items[s-1].valor = 1
                 } else {
-                    _stackCodeLines.items[_stackCodeLines.items.count - 2].valor = 0
+                    _stackCodeLines.items[s-1].valor = 0
                 }
-                _stackCodeLines.pop()
+                //_stackCodeLines.pop()
                 i += 1
-
+                self.s -= 1
             } else if (instruction == "CMEQ") {
 
-                let aux1 = _stackCodeLines.itemAtPosition(_stackCodeLines.items.count - 1 ?? 0)
+                let aux1 = _stackCodeLines.itemAtPosition(s)
 
-                let aux2 = _stackCodeLines.itemAtPosition(_stackCodeLines.items.count - 2 ?? 0)
+                let aux2 = _stackCodeLines.itemAtPosition(s-1)
 
-                if (aux2.valor ?? 0 <= aux1.valor ?? 0) {
-                    _stackCodeLines.items[_stackCodeLines.items.count - 2].valor = 1
+                if (aux2.valor <= aux1.valor ) {
+                    _stackCodeLines.items[s-1].valor = 1
                 } else {
-                    _stackCodeLines.items[_stackCodeLines.items.count - 2].valor = 0
+                    _stackCodeLines.items[s-1].valor = 0
                 }
-                _stackCodeLines.pop()
+               // _stackCodeLines.pop()
                 i += 1
-
+                self.s -= 1
             } else if (instruction == "CMAQ") {
 
-                let aux1 = _stackCodeLines.itemAtPosition(_stackCodeLines.items.count - 1 ?? 0)
+                let aux1 = _stackCodeLines.itemAtPosition(s)
 
-                let aux2 = _stackCodeLines.itemAtPosition(_stackCodeLines.items.count - 2 ?? 0)
+                let aux2 = _stackCodeLines.itemAtPosition(s-1)
 
-                if (aux2.valor ?? 0 >= aux1.valor ?? 0) {
-                    _stackCodeLines.items[_stackCodeLines.items.count - 2].valor = 1
+                if (aux2.valor  >= aux1.valor ) {
+                    _stackCodeLines.items[s-1].valor = 1
                 } else {
-                    _stackCodeLines.items[_stackCodeLines.items.count - 2].valor = 0
+                    _stackCodeLines.items[s-1].valor = 0
                 }
-                _stackCodeLines.pop()
+               // _stackCodeLines.pop()
                 i += 1
-
+                self.s -= 1
             } else if (instruction == "START") {
                 var _stackCodeLines = Stack<stackValues>()
                 i += 1
+                self.s = -1
+                
             } else if (instruction == "HLT") {
                 //print("ACABOOOOOU!")
                 if(instValue.linha != -1) {
@@ -362,10 +378,11 @@ class MachineCodeInterpreter  {
             } else if (instruction == "STR") {
 
                 if let endereco = Int((command.nodeAt(index: i)?.value.atrib1 ?? "")) {
-                    let aux = _stackCodeLines.itemAtPosition(_stackCodeLines.items.count - 1)
+                    let aux = _stackCodeLines.itemAtPosition(s)
                     _stackCodeLines.items[endereco].valor = aux.valor
-                    _stackCodeLines.pop()
+                   // _stackCodeLines.pop()
                     i += 1
+                    self.s -= 1
                 }
 
             } else if (instruction == "JMP") {
@@ -374,17 +391,17 @@ class MachineCodeInterpreter  {
                     i = atrib1 + 1
                 }
             } else if (instruction == "JMPF") {
-                let aux = _stackCodeLines.itemAtPosition(_stackCodeLines.items.count - 1).valor
+                let aux = _stackCodeLines.itemAtPosition(s).valor
 
                 if (aux == 0) {
-                    let aux = Int(command.nodeAt(index: i)?.value.atrib1 ?? "")
-                    i = aux ?? 0
+                    let aux = instValue.atrib1
+                    i = Int(aux) ?? -1
                 } else {
                     i += 1
                 }
 
-                _stackCodeLines.pop()
-
+                //_stackCodeLines.pop()
+                self.s -= 1
             } else if (instruction == "RD") {
                 print("Digite um valor: ")
 
@@ -395,63 +412,82 @@ class MachineCodeInterpreter  {
                 textfield.alignment = .center
                 alert.accessoryView = textfield
                 alert.runModal()
-
-                _stackCodeLines.push(stackValues(endereco: _stackCodeLines.items.count, valor: Int(textfield.stringValue) ?? 0))
+                self.s+=1
+                _stackCodeLines.items[s] = stackValues(endereco: s, valor: Int(textfield.stringValue) ?? 0)
+                //_stackCodeLines.push(stackValues(endereco: _stackCodeLines.items.count, valor: Int(textfield.stringValue) ?? 0))
+                                                       
                 i += 1
             } else if (instruction == "PRN") {
-                print("Saida: ", (_stackCodeLines.peek()?.valor ?? ""))
-                let print = _stackCodeLines.peek()?.valor ?? -1
+                print("Saida: ", (_stackCodeLines.items[s].valor))
+                
+                let print = _stackCodeLines.items[s].valor
+                
                 dataOutput.string += "Saída: \(print)\n"
-                _stackCodeLines.pop()
+                //_stackCodeLines.pop()
                 i += 1
+                self.s -= 1
             } else if (instruction == "ALLOC") {
 
-                var atrib1 = Int(instValue.atrib1) ?? 0
-                var atrib2 = Int(instValue.atrib2) ?? 0
+                let atrib1 = Int(instValue.atrib1) ?? 0
+                let atrib2 = Int(instValue.atrib2) ?? 0
 
                 for k in 0..<atrib2 {
-
+                    self.s+=1
+                    _stackCodeLines.items[s] = stackValues(endereco: s, valor: _stackCodeLines.itemAtPosition(k + atrib1).valor ?? 0)
+                    /*
                     if (_stackCodeLines.items.count > 4) {
                         _stackCodeLines.push(stackValues(endereco: _stackCodeLines.items.count, valor: _stackCodeLines.itemAtPosition(k + atrib1).valor ?? 0))
                     } else {
                         _stackCodeLines.push(stackValues(endereco: _stackCodeLines.items.count, valor: _stackCodeLines.peek()?.valor ?? 0))
-                    }
+                    }*/
                 }
 
                 i += 1
 
             } else if (instruction == "DALLOC") {
 
-                var atrib1 = Int((command.nodeAt(index: i)?.value.atrib1 ?? ""))!
-                var atrib2 = Int((command.nodeAt(index: i)?.value.atrib2 ?? ""))
+                let atrib1 = Int((command.nodeAt(index: i)?.value.atrib1 ?? ""))!
+                let atrib2 = Int((command.nodeAt(index: i)?.value.atrib2 ?? ""))
 
                 for k in stride(from: atrib2! - 1, through: 0, by: -1) {
-                    let aux = _stackCodeLines.itemAtPosition(_stackCodeLines.items.count - 1)
+                    let aux = _stackCodeLines.itemAtPosition(s)
+                    
                     _stackCodeLines.items[atrib1 + k].endereco = atrib1 + k
                     _stackCodeLines.items[atrib1 + k].valor = aux.valor
-                    _stackCodeLines.pop()
+                    //_stackCodeLines.pop()
+                    self.s = self.s - 1
                 }
+                
 
                 i += 1
 
             } else if (instruction == "CALL") {
-
+                self.s+=1
                 let atribuicao1: String? = command.nodeAt(index: i)?.value.atrib1
 
                 if let string = atribuicao1, let atribuicao1 = Int(string) {
                     var x = i
                     x += 1
                     i = atribuicao1
-                    _stackCodeLines.push(stackValues(endereco: _stackCodeLines.items.count, valor: x))
+                    //_stackCodeLines.push(stackValues(endereco: _stackCodeLines.items.count, valor: x))
+                    _stackCodeLines.items[s] = stackValues(endereco: s, valor: x)
                 }
 
             } else if (instruction == "RETURN") {
-                i = _stackCodeLines.itemAtPosition(_stackCodeLines.items.count - 1).valor
-                _stackCodeLines.pop()
+                i = _stackCodeLines.itemAtPosition(s).valor
+                //_stackCodeLines.pop()
+                self.s -= 1
             }
+        var count = self.s
         
+        if(count == -1 ){
+            count = 0
+        }
+        if(count < 30){
+            count = 30
+        }
         dataStackUI.removeAll()
-            for i in 0..<_stackCodeLines.items.count{
+            for i in 0..<count{
                 //stackUI[i][0] "endereco": "\(items.endereco)", "valor": "\(items.valor)"
                 //print(stackUI[i]["linha"])
 
@@ -461,6 +497,9 @@ class MachineCodeInterpreter  {
                 
                 //dataStackUI+=1
             }
+            
+        
+        
             if(instValue.linha != -1){
                 for i in 0..<dataCommandsUI.count{
                     

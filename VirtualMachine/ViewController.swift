@@ -52,13 +52,22 @@ class ViewController: NSViewController {
     var dataStack : [[String: String]] = [[:]]
     
     @IBAction func documentTextFieldAction(_ sender: NSTextField) {
+        //self.cleanVirtualMachine()
+        
+        if(data.count != 0){
+            data.removeAll()
+            data = [["endereco":"1", "valor":"1"]]
+        }
+        //dataOutput.string = ""
+        
         let filepath = FileManager.default.urls(for: .desktopDirectory, in: .userDomainMask)[0].appendingPathComponent(documentNameInput.stringValue)
         var contents : String
         do{
-         contents = try String(contentsOf: filepath)
-        self.VirtualMachine = MachineCodeInterpreter(fileContent: contents)
+            contents = try String(contentsOf: filepath)
+            
+            self.VirtualMachine =  MachineCodeInterpreter(fileContent: contents)
 
-        self.VirtualMachine?.analyser(stackUI: &self.data)
+            self.VirtualMachine?.analyser(stackUI: &self.data)
         }catch{
             print(error)
         }
@@ -75,6 +84,8 @@ class ViewController: NSViewController {
         }
         else {
             while(true){
+                
+                
                 if let ctrl = VirtualMachine?.executaNormal(dataCommandsUI: &self.data, dataStackUI: &self.dataStack, dataOutput : &self.dataOutput){
                     if(!ctrl){
                         self.cleanVirtualMachine()
@@ -82,6 +93,8 @@ class ViewController: NSViewController {
                     }
                 }
                 
+                
+               
             }
             
         }
@@ -181,8 +194,12 @@ class ViewController: NSViewController {
         }catch{
             print(error)
         }
+        
         mainTableView.reloadData()
         stackAddr.reloadData()
+        
+        
+        
     }
 
     override var representedObject: Any? {
