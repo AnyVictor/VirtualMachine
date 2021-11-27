@@ -126,8 +126,11 @@ class ViewController: NSViewController {
             print(error)
         }
         let queue = DispatchQueue(label: "work-queue")
+        self.stopButton.isEnabled = true
+        self.executeButton.isEnabled = true
         mainTableView.reloadData()
         stackAddr.reloadData()
+
     }
     
 
