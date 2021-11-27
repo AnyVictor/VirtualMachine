@@ -41,7 +41,10 @@ class ViewController: NSViewController {
     @IBOutlet weak var mainTableView: NSTableView!
     @IBOutlet weak var documentNameInput: NSTextField!
     @IBOutlet var dataOutput: NSTextView!
-    
+    @IBOutlet weak var executeButton: NSButton!
+    @IBOutlet weak var stopButton: NSButton!
+
+
     var _isRadioButtonSelected: Bool = false
     
     let nomes = ["Carlos","Joao","Manuel"]
@@ -52,22 +55,14 @@ class ViewController: NSViewController {
     var dataStack : [[String: String]] = [[:]]
     
     @IBAction func documentTextFieldAction(_ sender: NSTextField) {
-        let filepath = FileManager.default.urls(for: .desktopDirectory, in: .userDomainMask)[0].appendingPathComponent(documentNameInput.stringValue)
-        var contents : String
-        do{
-         contents = try String(contentsOf: filepath)
-        self.VirtualMachine = MachineCodeInterpreter(fileContent: contents)
-
-        self.VirtualMachine?.analyser(stackUI: &self.data)
-        }catch{
-            print(error)
-        }
-        let queue = DispatchQueue(label: "work-queue")
-        mainTableView.reloadData()
-        stackAddr.reloadData()
+        importQueue()
     }
-    @IBAction func executeCodeButton(_ sender: Any) {
-        
+
+    @IBAction func importButtonPressed(_ sender: Any) {
+        importQueue()
+    }
+
+    @IBAction func executeCodeAction(_ sender: Any) {
         //dataOutput.string = "zuinho"
         
         if(_isRadioButtonSelected){
@@ -105,8 +100,24 @@ class ViewController: NSViewController {
         }
         
     }
-    
-    
+
+    func importQueue() {
+        executeButton.isEnabled = true
+        stopButton.isEnabled = true
+        let filepath = FileManager.default.urls(for: .desktopDirectory, in: .userDomainMask)[0].appendingPathComponent(documentNameInput.stringValue)
+        var contents : String
+        do{
+         contents = try String(contentsOf: filepath)
+        self.VirtualMachine = MachineCodeInterpreter(fileContent: contents)
+
+        self.VirtualMachine?.analyser(stackUI: &self.data)
+        }catch{
+            print(error)
+        }
+        let queue = DispatchQueue(label: "work-queue")
+        mainTableView.reloadData()
+        stackAddr.reloadData()
+    }
     
 
     override func viewWillAppear() {
