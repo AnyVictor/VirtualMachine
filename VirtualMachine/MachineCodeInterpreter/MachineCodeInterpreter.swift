@@ -229,7 +229,7 @@ class MachineCodeInterpreter  {
                 self.s -= 1
             } else if (instruction == "MULT") {
                 let mult = (_stackCodeLines.items[s - 1].valor) * (_stackCodeLines.items[s].valor)
-                _stackCodeLines.items[_stackCodeLines.items.count - 1].valor = mult
+                _stackCodeLines.items[s - 1].valor = mult
                 //_stackCodeLines.pop()
                 i += 1
                 self.s -= 1
