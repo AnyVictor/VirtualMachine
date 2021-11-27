@@ -41,7 +41,10 @@ class ViewController: NSViewController {
     @IBOutlet weak var mainTableView: NSTableView!
     @IBOutlet weak var documentNameInput: NSTextField!
     @IBOutlet var dataOutput: NSTextView!
-    
+    @IBOutlet weak var executeButton: NSButton!
+    @IBOutlet weak var stopButton: NSButton!
+
+
     var _isRadioButtonSelected: Bool = false
     
     let nomes = ["Carlos","Joao","Manuel"]
@@ -52,31 +55,14 @@ class ViewController: NSViewController {
     var dataStack : [[String: String]] = [[:]]
     
     @IBAction func documentTextFieldAction(_ sender: NSTextField) {
-        //self.cleanVirtualMachine()
-        
-        if(data.count != 0){
-            data.removeAll()
-            data = [["endereco":"1", "valor":"1"]]
-        }
-        //dataOutput.string = ""
-        
-        let filepath = FileManager.default.urls(for: .desktopDirectory, in: .userDomainMask)[0].appendingPathComponent(documentNameInput.stringValue)
-        var contents : String
-        do{
-            contents = try String(contentsOf: filepath)
-            
-            self.VirtualMachine =  MachineCodeInterpreter(fileContent: contents)
-
-            self.VirtualMachine?.analyser(stackUI: &self.data)
-        }catch{
-            print(error)
-        }
-        let queue = DispatchQueue(label: "work-queue")
-        mainTableView.reloadData()
-        stackAddr.reloadData()
+        importQueue()
     }
-    @IBAction func executeCodeButton(_ sender: Any) {
-        
+
+    @IBAction func importButtonPressed(_ sender: Any) {
+        importQueue()
+    }
+
+    @IBAction func executeCodeAction(_ sender: Any) {
         //dataOutput.string = "zuinho"
         
         if(_isRadioButtonSelected){
@@ -118,8 +104,34 @@ class ViewController: NSViewController {
         }
         
     }
-    
-    
+
+    func importQueue() {
+        //self.cleanVirtualMachine()
+        dataOutput.string = ""
+        if(data.count != 0){
+            data.removeAll()
+            data = [["endereco":"1", "valor":"1"]]
+        }
+        //dataOutput.string = ""
+
+        let filepath = FileManager.default.urls(for: .desktopDirectory, in: .userDomainMask)[0].appendingPathComponent(documentNameInput.stringValue)
+        var contents : String
+        do{
+            contents = try String(contentsOf: filepath)
+
+            self.VirtualMachine =  MachineCodeInterpreter(fileContent: contents)
+
+            self.VirtualMachine?.analyser(stackUI: &self.data)
+        }catch{
+            print(error)
+        }
+        let queue = DispatchQueue(label: "work-queue")
+        self.stopButton.isEnabled = true
+        self.executeButton.isEnabled = true
+        mainTableView.reloadData()
+        stackAddr.reloadData()
+
+    }
     
 
     override func viewWillAppear() {
