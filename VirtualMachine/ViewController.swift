@@ -55,28 +55,6 @@ class ViewController: NSViewController {
     var dataStack : [[String: String]] = [[:]]
     
     @IBAction func documentTextFieldAction(_ sender: NSTextField) {
-        //self.cleanVirtualMachine()
-        
-        if(data.count != 0){
-            data.removeAll()
-            data = [["endereco":"1", "valor":"1"]]
-        }
-        //dataOutput.string = ""
-        
-        let filepath = FileManager.default.urls(for: .desktopDirectory, in: .userDomainMask)[0].appendingPathComponent(documentNameInput.stringValue)
-        var contents : String
-        do{
-            contents = try String(contentsOf: filepath)
-            
-            self.VirtualMachine =  MachineCodeInterpreter(fileContent: contents)
-
-            self.VirtualMachine?.analyser(stackUI: &self.data)
-        }catch{
-            print(error)
-        }
-        let queue = DispatchQueue(label: "work-queue")
-        mainTableView.reloadData()
-        stackAddr.reloadData()
         importQueue()
     }
 
@@ -128,15 +106,22 @@ class ViewController: NSViewController {
     }
 
     func importQueue() {
-        executeButton.isEnabled = true
-        stopButton.isEnabled = true
+        //self.cleanVirtualMachine()
+
+        if(data.count != 0){
+            data.removeAll()
+            data = [["endereco":"1", "valor":"1"]]
+        }
+        //dataOutput.string = ""
+
         let filepath = FileManager.default.urls(for: .desktopDirectory, in: .userDomainMask)[0].appendingPathComponent(documentNameInput.stringValue)
         var contents : String
         do{
-         contents = try String(contentsOf: filepath)
-        self.VirtualMachine = MachineCodeInterpreter(fileContent: contents)
+            contents = try String(contentsOf: filepath)
 
-        self.VirtualMachine?.analyser(stackUI: &self.data)
+            self.VirtualMachine =  MachineCodeInterpreter(fileContent: contents)
+
+            self.VirtualMachine?.analyser(stackUI: &self.data)
         }catch{
             print(error)
         }
