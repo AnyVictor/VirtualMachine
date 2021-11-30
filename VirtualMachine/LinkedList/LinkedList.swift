@@ -50,9 +50,13 @@ class LinkedList<T > {
             var node = head
             var i = index
             while node != nil {
-                if i == 0 { return node }
+                if i == 0 {
+                    return node
+                    
+                }
                 i -= 1
                 node = node!.next
+                
             }
         }
         return nil

@@ -30,6 +30,7 @@ class MachineCodeInterpreter  {
     var fileContent: String
     var linkedCodeLines: LinkedList<codeLine>
     var _stackCodeLines = Stack<stackValues>()
+    var listFinal : [codeLine] = []
     var lineCounter : Int
     var rotuleToReplace: [[Int]] = []
     var i:Int = 0
@@ -95,6 +96,7 @@ class MachineCodeInterpreter  {
             _linkedCodeLines.nextNode()
 
             value = _linkedCodeLines.first?.value ?? codeLine.defaultValue
+            listFinal.append(value)
 
         }
         
@@ -116,6 +118,7 @@ class MachineCodeInterpreter  {
             
             if(i == 0 && item.isNumber){
                 rotule = item.wholeNumberValue ?? -1
+               
             }else if(item != "\t"){
                 if(item != " "){
                     
@@ -141,6 +144,18 @@ class MachineCodeInterpreter  {
         }
         if(rotule != -1){
             // [toSearch, toReplace]
+            var ax : String = ""
+            for j in value{
+                if(j == "N" || j == " "){
+                    break;
+                }else{
+                    
+                    ax.append(j)
+                }
+            }
+            
+            rotule = Int(ax) ?? -1
+            
             rotuleToReplace.append([rotule, self.lineCounter])
             
             linkedCodeLines.append(codeLine(linha: self.lineCounter, inst: "NULL", atrib1: auxAtrib1, atrib2: auxAtrib2, com: ""))
@@ -166,6 +181,7 @@ class MachineCodeInterpreter  {
                 for item in self.rotuleToReplace{
                     if("\(item[0])" == value.atrib1){
                         _linkedCodeLines.append(codeLine(linha: value.linha, inst: value.inst, atrib1: "\(item[1])", atrib2: "", com: ""))
+                        break
                     }
                     
                 }
@@ -193,7 +209,9 @@ class MachineCodeInterpreter  {
 
             var instruction = command.nodeAt(index: i)?.value.inst
             var instValue = command.nodeAt(index: i)?.value ?? codeLine.defaultValue
-
+            
+        
+        
             if (instruction == "LDC") {
                 self.s += 1
                 let value = instValue
@@ -326,7 +344,7 @@ class MachineCodeInterpreter  {
 
                 let aux2 = _stackCodeLines.itemAtPosition(s-1)
 
-                if (aux2.valor ?? 0 != aux1.valor ?? 0) {
+                if (aux2.valor  != aux1.valor ) {
                     _stackCodeLines.items[s-1].valor = 1
                 } else {
                     _stackCodeLines.items[s-1].valor = 0
@@ -339,7 +357,10 @@ class MachineCodeInterpreter  {
                 let aux1 = _stackCodeLines.itemAtPosition(s)
 
                 let aux2 = _stackCodeLines.itemAtPosition(s-1)
-
+                
+                print(aux1)
+                print(aux2)
+                
                 if (aux2.valor <= aux1.valor ) {
                     _stackCodeLines.items[s-1].valor = 1
                 } else {
@@ -386,16 +407,22 @@ class MachineCodeInterpreter  {
                 }
 
             } else if (instruction == "JMP") {
-                let atribuicao1: String? = command.nodeAt(index: i)?.value.atrib1
-                if let string = atribuicao1, let atrib1 = Int(string) {
+                //let atribuicao1: String? = command.nodeAt(index: i)?.value.atrib1
+                let atribuicao1 = Int(instValue.atrib1) ?? -1
+                /*if let string = atribuicao1, let atrib1 = Int(string) {
                     i = atrib1 + 1
-                }
+                }*/
+                
+                i = atribuicao1 + 1
+                
+                
             } else if (instruction == "JMPF") {
                 let aux = _stackCodeLines.itemAtPosition(s).valor
 
                 if (aux == 0) {
                     let aux = instValue.atrib1
                     i = Int(aux) ?? -1
+                    // i+=1
                 } else {
                     i += 1
                 }
@@ -420,9 +447,13 @@ class MachineCodeInterpreter  {
             } else if (instruction == "PRN") {
                 print("Saida: ", (_stackCodeLines.items[s].valor))
                 
-                let print = _stackCodeLines.items[s].valor
+                let printE = _stackCodeLines.items[s].valor
                 
-                dataOutput.string += "Saída: \(print)\n"
+                if(printE == 5 ){
+                    print("mapooi")
+                }
+                
+                dataOutput.string += "Saída: \(printE)\n"
                 //_stackCodeLines.pop()
                 i += 1
                 self.s -= 1
@@ -486,14 +517,15 @@ class MachineCodeInterpreter  {
         if(count < 30){
             count = 30
         }
+    
         dataStackUI.removeAll()
-            for i in 0..<count{
+            for j in 0..<count{
                 //stackUI[i][0] "endereco": "\(items.endereco)", "valor": "\(items.valor)"
                 //print(stackUI[i]["linha"])
 
                 //dataCommandsUI[i]["linha"] = dataCommandsUI[i]["linha"]
                
-                dataStackUI.append([ "endereco": "\(_stackCodeLines.itemAtPosition(i).endereco)", "valor": "\(_stackCodeLines.itemAtPosition(i).valor)", "focus": "false"])
+                dataStackUI.append([ "endereco": "\(_stackCodeLines.itemAtPosition(j).endereco)", "valor": "\(_stackCodeLines.itemAtPosition(j).valor)", "focus": "false"])
                 
                 //dataStackUI+=1
             }
@@ -501,17 +533,18 @@ class MachineCodeInterpreter  {
         
         
             if(instValue.linha != -1){
-                for i in 0..<dataCommandsUI.count{
+                for j in 0..<dataCommandsUI.count{
                     
-                    if(i == instValue.linha){
+                    if(j == instValue.linha){
                         dataCommandsUI[instValue.linha]["focus"] = "true"
                     }else{
-                        dataCommandsUI[i]["focus"] = "false"
+                        dataCommandsUI[j]["focus"] = "false"
                     }
                     
                 }
             }
-
+            
+       
             return true
         }
 
