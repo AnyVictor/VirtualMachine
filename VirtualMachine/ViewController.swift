@@ -33,6 +33,10 @@ import Foundation
 //    }
 //}
 
+/*
+#REF 
+Controlador da UI
+*/
 
 class ViewController: NSViewController {
     @IBOutlet weak var normalRadioButton: NSButton!
@@ -63,27 +67,25 @@ class ViewController: NSViewController {
     }
 
     @IBAction func executeCodeAction(_ sender: Any) {
-        //dataOutput.string = "zuinho"
-        
+       
         if(_isRadioButtonSelected){
+            //executa uma linha de comando 
             VirtualMachine?.executaNormal(dataCommandsUI: &self.data, dataStackUI: &self.dataStack, dataOutput : &self.dataOutput)
         }
         else {
+            //executa passo a passo em loop para dar o efeito de execução direta
             while(true){
-                
-                
+
                 if let ctrl = VirtualMachine?.executaNormal(dataCommandsUI: &self.data, dataStackUI: &self.dataStack, dataOutput : &self.dataOutput){
                     if(!ctrl){
                         self.cleanVirtualMachine()
                         break
                     }
                 }
-                
-                
-               
             }
             
         }
+        //reload na tela
         mainTableView.reloadData()
         stackAddr.reloadData()
     }
@@ -106,13 +108,11 @@ class ViewController: NSViewController {
     }
 
     func importQueue() {
-        //self.cleanVirtualMachine()
         dataOutput.string = ""
         if(data.count != 0){
             data.removeAll()
             data = [["endereco":"1", "valor":"1"]]
         }
-        //dataOutput.string = ""
 
         let filepath = FileManager.default.urls(for: .desktopDirectory, in: .userDomainMask)[0].appendingPathComponent(documentNameInput.stringValue)
         var contents : String
@@ -151,6 +151,7 @@ class ViewController: NSViewController {
 //
 //    }
     
+    //Realiza ações para quando a tela carregou
     override func viewDidLoad() {
         super.viewDidLoad()
         mainTableView.delegate = self
@@ -192,17 +193,18 @@ class ViewController: NSViewController {
         }*/
     }
     
+    // Zerar variaveis da VM
     func cleanVirtualMachine(){
         let filepath = FileManager.default.urls(for: .desktopDirectory, in: .userDomainMask)[0].appendingPathComponent(documentNameInput.stringValue)
         var contents : String
         do{
             self.data = [["endereco":"1", "valor":"1"]]
 
-         contents = try String(contentsOf: filepath)
-        self.VirtualMachine = nil
-        self.VirtualMachine = MachineCodeInterpreter(fileContent: contents)
+            contents = try String(contentsOf: filepath)
+            self.VirtualMachine = nil
+            self.VirtualMachine = MachineCodeInterpreter(fileContent: contents)
 
-        self.VirtualMachine?.analyser(stackUI: &self.data)
+            self.VirtualMachine?.analyser(stackUI: &self.data)
         }catch{
             print(error)
         }
@@ -224,6 +226,7 @@ class ViewController: NSViewController {
 }
 
 //MARK: - Table View
+//#REF Cotrolador para renderizacao da Tabela
 extension ViewController: NSTableViewDelegate, NSTableViewDataSource {
     func numberOfRows(in tableView: NSTableView) -> Int {
         if tableView.identifier == NSUserInterfaceItemIdentifier(rawValue: "mainTableView") {

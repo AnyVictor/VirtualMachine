@@ -5,7 +5,7 @@
 import Foundation
 import Cocoa
 
-
+//#REF implmenta a estrutura de uma linha de codigo para analise | Posteriormente usada dentro da UI para print
 struct codeLine  {
     static var defaultValue:  codeLine = codeLine(linha: -1 , inst: "", atrib1: "", atrib2: "", com: "")
     var linha: Int
@@ -14,7 +14,7 @@ struct codeLine  {
     var atrib2: String
     var com: String
 }
-
+//#REF implementa uma pilha
 struct stackValues {
     static var defaultValue:  stackValues = stackValues(endereco: -1, valor: -1)
     var endereco: Int
@@ -24,13 +24,13 @@ struct stackValues {
 }
 
 
-
+//#REF implementa as funcoes basicas para criacao da maquina virtual
 class MachineCodeInterpreter  {
     
     var fileContent: String
     var linkedCodeLines: LinkedList<codeLine>
     var _stackCodeLines = Stack<stackValues>()
-    var listFinal : [codeLine] = []
+    var listFinal : [codeLine] = [] // usada para copia momentanea de Debug da Stack
     var lineCounter : Int
     var rotuleToReplace: [[Int]] = []
     var i:Int = 0
@@ -38,8 +38,6 @@ class MachineCodeInterpreter  {
     var s:Int = 0
     var lastS: Int = 0
 
-    /*var stackUI :  [[String: String]] = [["endereco":"2", "valor":"12"]]
-    var stackAddr: NSTableView*/
     
     init(fileContent: String) {
         self.fileContent = fileContent
@@ -47,24 +45,20 @@ class MachineCodeInterpreter  {
         self.lineCounter = 0
         _stackCodeLines.items = [stackValues](repeating: stackValues.defaultValue, count: 500)
       
-        //stackAddr.reloadData()
     }
  
     
     func analyser(stackUI : inout [[String: String]]) {
         self.extractCommands(stackUI: &stackUI)
-        
-        //stackAddr()
-        //self.executaNormal(command: linkedCodeLines, stackUI: &stackUI )
     }
     
-    
+    //#REF Extrai os comandos do arquivo lido
     func extractCommands(stackUI : inout [[String: String]]){
         
         var array = self.fileContent.components(separatedBy: .newlines)
 
         
-        
+        // Para cada linha do arquivo lido sera analisado com match de comando
         for item in array {
             
             var i = 0
@@ -102,6 +96,8 @@ class MachineCodeInterpreter  {
         
     }
     
+    //os cmandos buscados sao separados por espaços 
+    // Esses dois tipos de comandos sao tratados: <Comando> <atrib1> <atrib2> ou <X> NULL
     func matchWithCommand(_ value: Array<Character>){
         
         var crtlCommand = 0
@@ -143,6 +139,8 @@ class MachineCodeInterpreter  {
             
         }
         if(rotule != -1){
+            // foi encontrado um NULL
+            // é buscado até o N todos os numeros para construção da lsita de rotulos para substituiçao
             // [toSearch, toReplace]
             var ax : String = ""
             for j in value{
@@ -162,15 +160,10 @@ class MachineCodeInterpreter  {
 
         }else{
             linkedCodeLines.append(codeLine(linha: self.lineCounter, inst: auxCommand, atrib1: auxAtrib1, atrib2: auxAtrib2, com: ""))
-
         }
-        
-        
-        //
-     //print(linkedCodeLines)
-        //print(linkedCodeLines)
     }
     
+    // #REF a partir da lista de posições montada, é substituida pelo match correspondente
     func fixNullRotule(){
         var _linkedCodeLines: LinkedList<codeLine> = LinkedList<codeLine>()
 
@@ -201,7 +194,7 @@ class MachineCodeInterpreter  {
         
     }
     
-
+    //#REF executa um comando. Essa funcao é colocada dentro de um while dentro da UI
     func executaNormal(dataCommandsUI : inout [[String: String]], dataStackUI: inout [[String: String]], dataOutput: inout NSTextView) -> Bool {
 
             let command = self.linkedCodeLines
@@ -213,6 +206,10 @@ class MachineCodeInterpreter  {
         
         
             if (instruction == "LDC") {
+                /*
+                    LDC k (Carregar constante):
+                    S:=s + 1 ; M [s]: = k
+                */
                 self.s += 1
                 let value = instValue
                 //_stackCodeLines.push(stackValues(endereco: _stackCodeLines.items.count, valor: Int(value.atrib1) ?? -1))
@@ -220,50 +217,80 @@ class MachineCodeInterpreter  {
                 i += 1
                 
             } else if (instruction == "NULL") {
+                /*
+                    NULL
+                    i+1
+                */
                 i += 1
             } else if (instruction == "LDV") {
+                /*
+                    LDV n (Carregar valor):
+                    S:=s+1 ; M[s]:=M[n]
+                */
                 self.s += 1
                 let value = instValue
 
                 let aux = _stackCodeLines.itemAtPosition(Int(value.atrib1) ?? 0 )
-                //_stackCodeLines.push(stackValues(endereco: _stackCodeLines.items.count, valor: aux.valor))
                 _stackCodeLines.inserAtPosition(s, stackValues(endereco: s, valor: aux.valor))
                 i += 1
                 
             } else if (instruction == "ADD") {
+                /*
+                    ADD (Somar):
+                    M[s-1]:=M[s-1]+M[s]; s:=s-1
+                */
+
                 let add = (_stackCodeLines.itemAtPosition(s - 1).valor) + (_stackCodeLines.itemAtPosition(s).valor)
                 _stackCodeLines.items[s - 1].valor = add
-                
-                //_stackCodeLines.inserAtPosition(s-1, add)
-                
-                //_stackCodeLines.pop()
+
                 i += 1
                 s -= 1
             } else if (instruction == "SUB") {
+                /*
+                    SUB (Subtrair):
+                    M[s-1]:=M[s-1]-M[s]; s:=s-1
+
+                */
                 let sub = (_stackCodeLines.items[s - 1].valor) - (_stackCodeLines.items[s].valor)
                 _stackCodeLines.items[s - 1].valor = sub
-                //_stackCodeLines.pop()
                 i += 1
                 self.s -= 1
             } else if (instruction == "MULT") {
+                /*
+                    MULT (Multiplicar):
+                    M[s-1]:=M[s-1]*M[s]; s:=s-1
+                */
+
                 let mult = (_stackCodeLines.items[s - 1].valor) * (_stackCodeLines.items[s].valor)
                 _stackCodeLines.items[s - 1].valor = mult
-                //_stackCodeLines.pop()
                 i += 1
                 self.s -= 1
 
             } else if (instruction == "DIVI") {
+                /*
+                    DIVI (Dividir):
+                    M[s-1]:=M[s-1] div M[s]; s:=s-1
+                */
                 let div = (_stackCodeLines.items[s - 1].valor) / (_stackCodeLines.items[s].valor)
                 _stackCodeLines.items[s - 1].valor = div
-               // _stackCodeLines.pop()
                 i += 1
                 self.s -= 1
             } else if (instruction == "INV") {
+                /*
+                    INV (Inverter sinal):
+                     M[s]:=-M[s]
+                */
+
                 let inv = -(_stackCodeLines.items[s].valor);
                 _stackCodeLines.items[s].valor = inv
                 i += 1
 
             } else if (instruction == "AND") {
+                /*
+                    AND (Conjunção):
+                    Se M [s-1]=1 e M[s]=1 então M[s-1]:=1 senão M[s-1]:=0; S:=s-1
+                */
+
                 let aux1 = _stackCodeLines.itemAtPosition(s-1)
 
                 let aux2 = _stackCodeLines.itemAtPosition(s)
@@ -273,11 +300,14 @@ class MachineCodeInterpreter  {
                 } else {
                     _stackCodeLines.items[s-1].valor = 0
                 }
-                //_stackCodeLines.pop()
                 i += 1
                 self.s -= 1
 
             } else if (instruction == "OR") {
+                /*
+                    OR (Disjunção):
+                    Se M[s-1]=1 ou M[s]=1 então M[s-1]:=1 senão M[s-1]:=0; s:=s-1
+                */
                 let aux1 = _stackCodeLines.itemAtPosition(s-1)
 
                 let aux2 = _stackCodeLines.itemAtPosition(s)
@@ -287,17 +317,24 @@ class MachineCodeInterpreter  {
                 } else {
                     _stackCodeLines.items[s-1].valor = 0
                 }
-                //_stackCodeLines.pop()
                 i += 1
                 self.s -= 1
             } else if (instruction == "NEG") {
+                /*
+                    NEG (Negação):
+                    M[s]:=1-M[s]
+                */
 
                 let neg = (1 - (_stackCodeLines.items[s].valor));
                 _stackCodeLines.items[s].valor = neg
                 i += 1
 
             } else if (instruction == "CME") {
+                /*
+                    CME (Comparar menor):
+                    Se M[s-1]<M[s] então M[s-1]:=1 senão M[s-1]:=0; s:=s-1
 
+                */
                 let aux1 = _stackCodeLines.itemAtPosition(s)
 
                 let aux2 = _stackCodeLines.itemAtPosition(s-1)
@@ -311,7 +348,10 @@ class MachineCodeInterpreter  {
                 i += 1
                 self.s -= 1
             } else if (instruction == "CMA") {
-
+                /*
+                    CMA (Comparar maior):
+                    Se M[s-1] >M[s] então M[s-1]:=1 senão M[s-1]:=0;s:=s-1
+                */
                 let aux1 = _stackCodeLines.itemAtPosition(s)
 
                 let aux2 = _stackCodeLines.itemAtPosition(s-1)
@@ -325,7 +365,10 @@ class MachineCodeInterpreter  {
                 i += 1
                 self.s -= 1
             } else if (instruction == "CEQ") {
-
+                /*
+                    CEQ (comparar igual):
+                    Se M[s-1]=M[s] então M[s-1]:=1 senão M[s-1]:=0;s:=s-1
+                */
                 let aux1 = _stackCodeLines.itemAtPosition(s)
 
                 let aux2 = _stackCodeLines.itemAtPosition(s-1)
@@ -335,11 +378,14 @@ class MachineCodeInterpreter  {
                 } else {
                     _stackCodeLines.items[s-1].valor = 0
                 }
-               // _stackCodeLines.pop()
                 i += 1
                 self.s -= 1
             } else if (instruction == "CDIF") {
+                /*
+                    CDIF (Comparar desigual):
+                    Se M[s-1] != M[s] então M[s-1]:=1 senão M[s-1]:=0; s:=s-1
 
+                */
                 let aux1 = _stackCodeLines.itemAtPosition(s)
 
                 let aux2 = _stackCodeLines.itemAtPosition(s-1)
@@ -349,28 +395,33 @@ class MachineCodeInterpreter  {
                 } else {
                     _stackCodeLines.items[s-1].valor = 0
                 }
-                //_stackCodeLines.pop()
                 i += 1
                 self.s -= 1
             } else if (instruction == "CMEQ") {
+                /*
+                    CMEQ (Comparar menor ou igual)
+                    Se M[s-1] == M[s] então M[s-1]:=1 senão M[s-1]:=0;s:=s-1
 
+                */
                 let aux1 = _stackCodeLines.itemAtPosition(s)
 
                 let aux2 = _stackCodeLines.itemAtPosition(s-1)
                 
-                print(aux1)
-                print(aux2)
+                //print(aux1)
+                //print(aux2)
                 
                 if (aux2.valor <= aux1.valor ) {
                     _stackCodeLines.items[s-1].valor = 1
                 } else {
                     _stackCodeLines.items[s-1].valor = 0
                 }
-               // _stackCodeLines.pop()
                 i += 1
                 self.s -= 1
             } else if (instruction == "CMAQ") {
-
+                /*
+                    CMAQ (Comparar maior ou igual):
+                    Se M[s-1] >= M[s] então M[s-1]:=1 senão M[s-1]:=0; s:=s-1
+                */
                 let aux1 = _stackCodeLines.itemAtPosition(s)
 
                 let aux2 = _stackCodeLines.itemAtPosition(s-1)
@@ -380,16 +431,22 @@ class MachineCodeInterpreter  {
                 } else {
                     _stackCodeLines.items[s-1].valor = 0
                 }
-               // _stackCodeLines.pop()
                 i += 1
                 self.s -= 1
             } else if (instruction == "START") {
+                /*
+                    START (Iniciar programa principal):
+                    S:=-1
+                */
                 var _stackCodeLines = Stack<stackValues>()
                 i += 1
                 self.s = -1
                 
             } else if (instruction == "HLT") {
-                //print("ACABOOOOOU!")
+                /*
+                    HLT (Parar):
+                    “Pára a execução da MVD”
+                */
                 if(instValue.linha != -1) {
                     dataCommandsUI[instValue.linha]["focus"] = "true"
                 }
@@ -397,42 +454,51 @@ class MachineCodeInterpreter  {
                 dataOutput.string += "Fim ;)\n"
                 return false
             } else if (instruction == "STR") {
+                /*
+                    STR n (Armazenar valor):
+                    M[n]:=M[s]; s:=s-1
+                */
 
                 if let endereco = Int((command.nodeAt(index: i)?.value.atrib1 ?? "")) {
                     let aux = _stackCodeLines.itemAtPosition(s)
                     _stackCodeLines.items[endereco].valor = aux.valor
-                   // _stackCodeLines.pop()
                     i += 1
                     self.s -= 1
                 }
 
             } else if (instruction == "JMP") {
-                //let atribuicao1: String? = command.nodeAt(index: i)?.value.atrib1
-                let atribuicao1 = Int(instValue.atrib1) ?? -1
-                /*if let string = atribuicao1, let atrib1 = Int(string) {
-                    i = atrib1 + 1
-                }*/
-                
+                /*
+                    JMP p (Desviar sempre):
+                    i:=p
+                */
+
+                let atribuicao1 = Int(instValue.atrib1) ?? -1            
                 i = atribuicao1 + 1
                 
-                
             } else if (instruction == "JMPF") {
+                /*
+                    JMPF p (Desviar se falso):
+                    Se M[s]=0 então i:=p senão i:=i+1;
+                    S:=s-1
+                */
                 let aux = _stackCodeLines.itemAtPosition(s).valor
 
                 if (aux == 0) {
                     let aux = instValue.atrib1
                     i = Int(aux) ?? -1
-                    // i+=1
                 } else {
                     i += 1
                 }
 
-                //_stackCodeLines.pop()
                 self.s -= 1
             } else if (instruction == "RD") {
+                /*
+                    RD (Leitura):
+                    S:=s+1; M[s]:= “próximo valor de entrada”.
+                */
+
                 print("Digite um valor: ")
 
-                //var str = readLine() ?? ""
                 let alert = NSAlert()
                 alert.messageText = "Digite uma Entrada"
                 let textfield = NSTextField(frame: NSRect(x: 0.0, y: 0.0, width: 80.0, height: 24.0))
@@ -440,11 +506,13 @@ class MachineCodeInterpreter  {
                 alert.accessoryView = textfield
                 alert.runModal()
                 self.s+=1
-                _stackCodeLines.items[s] = stackValues(endereco: s, valor: Int(textfield.stringValue) ?? 0)
-                //_stackCodeLines.push(stackValues(endereco: _stackCodeLines.items.count, valor: Int(textfield.stringValue) ?? 0))
-                                                       
+                _stackCodeLines.items[s] = stackValues(endereco: s, valor: Int(textfield.stringValue) ?? 0)                                                      
                 i += 1
             } else if (instruction == "PRN") {
+                /*
+                  PRN (Impressão):
+                 “Imprimir M[s]”; s:=s-1
+                */
                 print("Saida: ", (_stackCodeLines.items[s].valor))
                 
                 let printE = _stackCodeLines.items[s].valor
@@ -454,10 +522,14 @@ class MachineCodeInterpreter  {
                 }
                 
                 dataOutput.string += "Saída: \(printE)\n"
-                //_stackCodeLines.pop()
                 i += 1
                 self.s -= 1
             } else if (instruction == "ALLOC") {
+                /*
+                    ALLOC m (Alocar memória*):
+                    S:=s+m
+
+                */
 
                 let atrib1 = Int(instValue.atrib1) ?? 0
                 let atrib2 = Int(instValue.atrib2) ?? 0
@@ -465,18 +537,15 @@ class MachineCodeInterpreter  {
                 for k in 0..<atrib2 {
                     self.s+=1
                     _stackCodeLines.items[s] = stackValues(endereco: s, valor: _stackCodeLines.itemAtPosition(k + atrib1).valor ?? 0)
-                    /*
-                    if (_stackCodeLines.items.count > 4) {
-                        _stackCodeLines.push(stackValues(endereco: _stackCodeLines.items.count, valor: _stackCodeLines.itemAtPosition(k + atrib1).valor ?? 0))
-                    } else {
-                        _stackCodeLines.push(stackValues(endereco: _stackCodeLines.items.count, valor: _stackCodeLines.peek()?.valor ?? 0))
-                    }*/
                 }
 
                 i += 1
 
             } else if (instruction == "DALLOC") {
-
+                /*
+                    DALLOC m (liberar memória):
+                    S:=s-m
+                */
                 let atrib1 = Int((command.nodeAt(index: i)?.value.atrib1 ?? ""))!
                 let atrib2 = Int((command.nodeAt(index: i)?.value.atrib2 ?? ""))
 
@@ -500,13 +569,11 @@ class MachineCodeInterpreter  {
                     var x = i
                     x += 1
                     i = atribuicao1
-                    //_stackCodeLines.push(stackValues(endereco: _stackCodeLines.items.count, valor: x))
                     _stackCodeLines.items[s] = stackValues(endereco: s, valor: x)
                 }
 
             } else if (instruction == "RETURN") {
                 i = _stackCodeLines.itemAtPosition(s).valor
-                //_stackCodeLines.pop()
                 self.s -= 1
             }
         var count = self.s
